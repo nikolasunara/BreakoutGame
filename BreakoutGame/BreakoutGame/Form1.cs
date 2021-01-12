@@ -49,7 +49,7 @@ namespace BreakoutGame
 
 			gameTimer.Start();
 
-			foreach(Control x in this.Controls)
+			foreach(Control x in this.splitContainer1.Panel2.Controls)
 			{
 				if(x is PictureBox && x.Tag is "blocks")
 				{
@@ -86,7 +86,9 @@ namespace BreakoutGame
 					a++;
 					blockArray[i].Left = left;
 					blockArray[i].Top = top;
-					this.Controls.Add(blockArray[i]);
+					//this.Controls.Add(blockArray[i]);
+					this.splitContainer1.Panel2.Controls.Add(blockArray[i]);
+					
 					left = left + 80; 
 				}
 			}
@@ -122,7 +124,7 @@ namespace BreakoutGame
 			{
 				player.Left -= playerSpeed;
 			}
-			if (goRight == true && player.Left < 599)
+			if (goRight == true && player.Right < splitContainer1.Panel2.Width - 7) 
 			{
 				player.Left += playerSpeed;
 			}
@@ -130,7 +132,7 @@ namespace BreakoutGame
 			ball.Left += ballX;
 			ball.Top += ballY;
 
-			if(ball.Left < 0 || ball.Left > 715)
+			if(ball.Left < 0 || ball.Right > splitContainer1.Panel2.Width)
 			{
 				ballX = -ballX;
 			}
@@ -143,7 +145,7 @@ namespace BreakoutGame
 				ballY = -ballY;
 			}
 
-			foreach (Control x in this.Controls)
+			foreach (Control x in this.splitContainer1.Panel2.Controls)
 			{
 				if (x is PictureBox && x.Tag is "blocks")
 				{
@@ -152,12 +154,12 @@ namespace BreakoutGame
 						score += 1;
 						ballY = -ballY;
 
-						this.Controls.Remove(x);
+						this.splitContainer1.Panel2.Controls.Remove(x);
 					}
 				}
 			}
 
-			if(ball.Top > 468)
+			if(ball.Top > player.Top)
 			{
 				gameOver("Game over! Press Enter to play again.");
 			}
@@ -192,5 +194,19 @@ namespace BreakoutGame
 			}
 		}
 
-	}
+        private void scoreText_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void player_Click(object sender, EventArgs e)
+        {
+
+        }
+    }
 }
