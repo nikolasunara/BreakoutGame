@@ -1,25 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace BreakoutGame
 {
-	public partial class Form1 : Form
+    public partial class Form1 : Form
 	{
 		bool goLeft;
 		bool goRight;
 		bool isGameOver;
 
 		int score;
-		int ballX;
-		int ballY;
 		int playerSpeed;
+		double ball_speed;
+
+		//Ove varijable sluze za pokretanje loptice. Pomicemo ju tako da
+		//poziciji loptice dodamo ballX s lijeve, odnosno ballY s gornje strane.
+		//Uvijek vrijedi ballX^2 + ballY^2 = ball_speed^2
+		double ballX;
+		double ballY;
 
 		PictureBox[] blockArray;
 
@@ -37,15 +36,20 @@ namespace BreakoutGame
 		{
 			isGameOver = false;
 			score = 0;
-			ballX = 5;
-			ballY = -5;
 			playerSpeed = 12;
 			scoreText.Text = "Score: " + score;
+			textBox1.Text = "Press SPACE to start the game";
 
-			ball.Left = 345;
-			ball.Top = 250;
+			//na pocetku je loptica nepomicna, tj. stoji na ploci
+			ball_speed = 0;
+			ballX = 0;
+			ballY = 0;
 
-			player.Left = 320;
+			//namjesti plocu na sredinu
+			player.Left = (int)(splitContainer1.Panel2.Width / 2 - player.Width / 2);
+			//namjesti lopticu na sredinu ploce
+			ball.Left = player.Left + player.Width / 2 - ball.Width/2;
+			ball.Top = player.Top - ball.Height;
 
 			gameTimer.Start();
 
@@ -55,41 +59,43 @@ namespace BreakoutGame
 				{
 					x.BackColor = Color.Gray;
 					x.BackgroundImage = Properties.Resources.redBrick;
+					x.BackgroundImageLayout = ImageLayout.Stretch;
 				}
 			}
 		}
 
 		private void placeBlocks()
 		{
-			blockArray = new PictureBox[24];
+			//postavljanje 30 blokova u 3 reda
+			blockArray = new PictureBox[30];
 
-			int a = 0;
-			int top = 50;
-			int left = 60;
+			int in_row = 0; 
+			int top = 40;
+			int left = 1;
+			int width = (int)(splitContainer1.Panel2.Width - 14) / 10;
 
 			for(int i = 0; i < blockArray.Length; ++i)
 			{
 				blockArray[i] = new PictureBox();
 				blockArray[i].Height = 32;
-				blockArray[i].Width = 64;
+				blockArray[i].Width = width;
 				blockArray[i].Tag = "blocks";
 				blockArray[i].BackColor = Color.White;
 
-				if(a == 8)
+				if(in_row == 10)
 				{
-					top = top + 50;
-					left = 60;
-					a = 0;
+					top = top + 34;
+					left = 1;
+					in_row = 0;
 				}
-				if(a < 8)
+				if(in_row < 10)
 				{
-					a++;
+					in_row++;
 					blockArray[i].Left = left;
 					blockArray[i].Top = top;
-					//this.Controls.Add(blockArray[i]);
 					this.splitContainer1.Panel2.Controls.Add(blockArray[i]);
 					
-					left = left + 80; 
+					left = left + width + 1; 
 				}
 			}
 
@@ -100,7 +106,7 @@ namespace BreakoutGame
 		{
 			foreach(PictureBox x in blockArray)
 			{
-				this.Controls.Remove(x);
+				this.splitContainer1.Panel2.Controls.Remove(x);
 			}
 		}
 
@@ -113,7 +119,8 @@ namespace BreakoutGame
 		{
 			isGameOver = true;
 			gameTimer.Stop();
-			scoreText.Text = "Score: " + score + " " + message;
+			scoreText.Text = "Score: " + score;
+			textBox1.Text = message;
 		}
 
 		private void mainGameTimerEvent(object sender, EventArgs e)
@@ -123,16 +130,21 @@ namespace BreakoutGame
 			if(goLeft == true && player.Left > 0)
 			{
 				player.Left -= playerSpeed;
+				if (ball_speed == 0.0)
+					ball.Left -= playerSpeed;
 			}
 			if (goRight == true && player.Right < splitContainer1.Panel2.Width - 7) 
 			{
 				player.Left += playerSpeed;
+				if (ball_speed == 0.0)
+					ball.Left += playerSpeed;
 			}
 
-			ball.Left += ballX;
-			ball.Top += ballY;
-
-			if(ball.Left < 0 || ball.Right > splitContainer1.Panel2.Width)
+			//pomakni lopticu
+			ball.Left += (int)ballX;
+			ball.Top += (int)ballY;
+			
+			if (ball.Left < 0 || ball.Right > splitContainer1.Panel2.Width)
 			{
 				ballX = -ballX;
 			}
@@ -140,9 +152,24 @@ namespace BreakoutGame
 			{
 				ballY = -ballY;
 			}
+
+			//Lopta udara u igraca
 			if(ball.Bounds.IntersectsWith(player.Bounds))
 			{
 				ballY = -ballY;
+				//pozicija gdje loptica udara o plocu
+				double pos = ball.Width / 2 + ball.Left;
+	
+				double sredina_ploce = player.Left + player.Width / 2;
+				double omjer = 2 * (pos - sredina_ploce) / player.Width;
+
+				//mapiranje intervala [-1,1]->[PI,0]
+				double kut = Math.PI - (omjer + 1) * Math.PI / 2;
+				//nedaj kut manji od PI/7
+				kut = Math.Abs(kut) < Math.PI / 7 ? Math.PI / 7 : kut;
+
+				ballY = -Math.Sin(kut) * ball_speed;
+				ballX = Math.Cos(kut) * ball_speed;
 			}
 
 			foreach (Control x in this.splitContainer1.Panel2.Controls)
@@ -171,9 +198,18 @@ namespace BreakoutGame
 			{
 				goLeft = true;
 			}
-			if (e.KeyCode == Keys.Right)
+			else if (e.KeyCode == Keys.Right)
 			{
 				goRight = true;
+			}
+			else if (e.KeyCode == Keys.Space && ball_speed == 0)
+            {
+				ball_speed = 9;
+				//odredi kut pod kojim ce loptica biti ispaljena
+				double kut = 0.3 + rnd.NextDouble() * (2.8 - 0.3);
+				ballY = -Math.Sin(kut) * ball_speed;
+				ballX = Math.Cos(kut) * ball_speed;
+				textBox1.Text = "";
 			}
 		}
 
@@ -204,7 +240,7 @@ namespace BreakoutGame
 
         }
 
-        private void player_Click(object sender, EventArgs e)
+        private void Player_Click(object sender, EventArgs e)
         {
 
         }

@@ -34,6 +34,7 @@
             this.ball = new System.Windows.Forms.PictureBox();
             this.player = new System.Windows.Forms.PictureBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.ball)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.player)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -61,7 +62,7 @@
             // 
             this.ball.BackColor = System.Drawing.SystemColors.ControlDarkDark;
             this.ball.Image = global::BreakoutGame.Properties.Resources.circle_cropped;
-            this.ball.Location = new System.Drawing.Point(3, 435);
+            this.ball.Location = new System.Drawing.Point(301, 442);
             this.ball.Name = "ball";
             this.ball.Size = new System.Drawing.Size(22, 20);
             this.ball.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -72,13 +73,13 @@
             // 
             this.player.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.player.Image = global::BreakoutGame.Properties.Resources.panel1;
-            this.player.Location = new System.Drawing.Point(301, 530);
+            this.player.Location = new System.Drawing.Point(301, 527);
             this.player.Name = "player";
             this.player.Size = new System.Drawing.Size(142, 20);
             this.player.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.player.TabIndex = 1;
             this.player.TabStop = false;
-            this.player.Click += new System.EventHandler(this.player_Click);
+            this.player.Click += new System.EventHandler(this.Player_Click);
             // 
             // splitContainer1
             // 
@@ -94,11 +95,14 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.splitContainer1.Panel1.Controls.Add(this.textBox1);
             this.splitContainer1.Panel1.Controls.Add(this.scoreText);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.splitContainer1.Panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.splitContainer1.Panel2.Controls.Add(this.ball);
             this.splitContainer1.Panel2.Controls.Add(this.player);
             this.splitContainer1.Panel2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
@@ -106,6 +110,19 @@
             this.splitContainer1.Size = new System.Drawing.Size(903, 597);
             this.splitContainer1.SplitterDistance = 165;
             this.splitContainer1.TabIndex = 4;
+            // 
+            // textBox1
+            // 
+            this.textBox1.BackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.textBox1.ForeColor = System.Drawing.SystemColors.InfoText;
+            this.textBox1.Location = new System.Drawing.Point(9, 58);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
+            this.textBox1.Size = new System.Drawing.Size(149, 191);
+            this.textBox1.TabIndex = 4;
             // 
             // Form1
             // 
@@ -142,6 +159,7 @@
         private System.Windows.Forms.Timer gameTimer;
         private System.Windows.Forms.Label scoreText;
         private System.Windows.Forms.SplitContainer splitContainer1;
+        public System.Windows.Forms.TextBox textBox1;
     }
 }
 
