@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -12,8 +13,12 @@ namespace BreakoutGame
 
 		int score;
 		int playerSpeed;
-		int counter;			//broji vrijeme igre
+
+		int counter;            //broji vrijeme igre
+		int time_to_shift;      //broji vrijeme do pomaka kocki prema dolje	
 		double ball_speed;
+
+		int lowest;				//prati poziciju najdonje kocke
 
 		//Ove varijable sluze za pokretanje loptice. Pomicemo ju tako da
 		//poziciji loptice dodamo ballX s lijeve, odnosno ballY s gornje strane.
@@ -21,7 +26,8 @@ namespace BreakoutGame
 		double ballX;
 		double ballY;
 
-		PictureBox[] blockArray;
+		//PictureBox[] blockArray;
+		List<PictureBox> blockArray = new List<PictureBox>();
 
 		Random rnd = new Random();
 
@@ -38,6 +44,8 @@ namespace BreakoutGame
 			isGameOver = false;
 			score = 0;
 			counter = 0;
+			lowest = 0;
+			time_to_shift = 0;
 			playerSpeed = 12;
 			scoreText.Text = "Score: " + score;
 			textBox1.Text = "Press SPACE to start the game";
@@ -55,54 +63,48 @@ namespace BreakoutGame
 			ball.Top = player.Top - ball.Height;
 
 			gameTimer.Start();
-
-			foreach(Control x in this.splitContainer1.Panel2.Controls)
-			{
-				if(x is PictureBox && x.Tag is "blocks")
-				{
-					x.BackColor = Color.Gray;
-					x.BackgroundImage = Properties.Resources.redBrick;
-					x.BackgroundImageLayout = ImageLayout.Stretch;
-				}
-			}
 		}
 
 		private void placeBlocks()
 		{
-			//postavljanje 30 blokova u 3 reda
-			blockArray = new PictureBox[30];
-
-			int in_row = 0; 
-			int top = 40;
+			// za pocetak nacrtaj 3 reda
+			draw_rows(3);
+			//pripremi igru
+			setupGame();
+		}
+		private void draw_rows(int n) //crta n redova kocki
+        {
+			int top = 5;
 			int left = 1;
 			int width = (int)(splitContainer1.Panel2.Width - 14) / 10;
 
-			for(int i = 0; i < blockArray.Length; ++i)
-			{
-				blockArray[i] = new PictureBox();
-				blockArray[i].Height = 32;
-				blockArray[i].Width = width;
-				blockArray[i].Tag = "blocks";
-				blockArray[i].BackColor = Color.White;
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+					//stvori blok i postavi mu svojstva
+					var block = new PictureBox();
+					block.Height = 32;
+					block.Width = width;
+					block.Tag = "blocks";
+					block.BackColor = Color.White;
+					block.Left = left;
+					block.Top = top;
 
-				if(in_row == 10)
-				{
-					top = top + 34;
-					left = 1;
-					in_row = 0;
-				}
-				if(in_row < 10)
-				{
-					in_row++;
-					blockArray[i].Left = left;
-					blockArray[i].Top = top;
-					this.splitContainer1.Panel2.Controls.Add(blockArray[i]);
-					
-					left = left + width + 1; 
-				}
-			}
+					block.BackColor = Color.Gray;
+					block.BackgroundImage = Properties.Resources.redBrick;
+					block.BackgroundImageLayout = ImageLayout.Stretch;
 
-			setupGame();
+					blockArray.Add(block);
+					this.splitContainer1.Panel2.Controls.Add(block);
+
+					left += width;
+				}
+				left = 1;
+				top += 33;
+				if (top > lowest)
+					lowest = top;
+            }
 		}
 
 		private void removeBlocks()
@@ -111,6 +113,7 @@ namespace BreakoutGame
 			{
 				this.splitContainer1.Panel2.Controls.Remove(x);
 			}
+			blockArray.Clear();
 		}
 
 		private void Form1_Load(object sender, EventArgs e)
@@ -118,20 +121,21 @@ namespace BreakoutGame
 
 		}
 
-		private void gameOver(String message)
+		private void gameOver()
 		{
 			isGameOver = true;
 			gameTimer.Stop();
 			timer1.Stop();
 			scoreText.Text = "Score: " + score;
-			textBox1.Text = message;
+			textBox1.Text = "Game over! Press Enter to play again.";
 		}
 
 		private void mainGameTimerEvent(object sender, EventArgs e)
 		{
 			scoreText.Text = "Score: " + score;
 
-			if(goLeft == true && player.Left > 0)
+			//pomakni plocu ako je pritisnuta tipka za lijevo ili desno
+			if (goLeft == true && player.Left > 0)
 			{
 				player.Left -= playerSpeed;
 				if (ball_speed == 0.0)
@@ -148,6 +152,7 @@ namespace BreakoutGame
 			ball.Left += (int)ballX;
 			ball.Top += (int)ballY;
 			
+			//Lopta udara u rub prozora
 			if (ball.Left < 0 || ball.Right > splitContainer1.Panel2.Width)
 			{
 				ballX = -ballX;
@@ -174,8 +179,10 @@ namespace BreakoutGame
 
 				ballY = -Math.Sin(kut) * ball_speed;
 				ballX = Math.Cos(kut) * ball_speed;
-			}
 
+			}
+			
+			// Provjeri dodiruje li lopta neku ciglu
 			foreach (Control x in this.splitContainer1.Panel2.Controls)
 			{
 				if (x is PictureBox && x.Tag is "blocks")
@@ -186,13 +193,44 @@ namespace BreakoutGame
 						ballY = -ballY;
 
 						this.splitContainer1.Panel2.Controls.Remove(x);
+						
+						// azuriraj lowest
+						foreach (var t in blockArray)
+							/*if (t.Top == x.Top && t.Left == x.Left)
+								blockArray.Remove(t);
+							else*/
+								lowest = (t.Top > lowest) ? t.Top : lowest;
 					}
 				}
 			}
 
 			if(ball.Top > player.Top)
 			{
-				gameOver("Game over! Press Enter to play again.");
+				gameOver();
+			}
+
+			//ako je proslo bar 5 sek od zadnjeg dodavanja probaj dodat novi red na vrh
+			//poslije cemo staviti vece
+			if (time_to_shift > 2)
+			{
+				//prvo provjeri moze li se pomaknuti 
+				foreach (var x in blockArray)
+				{
+					//Rectangle rect = new Rectangle(x.Left, x.Top + , x.Width, 32);
+					if (ball.Bounds.IntersectsWith(x.Bounds))
+						return;
+
+				}
+				//ako je doslo do tu znaci da se moze pomaknuti
+				foreach (var x in blockArray)
+				{
+					x.Top += 33;
+					lowest += 33;
+					if (x.Top + 33 > player.Top)
+						gameOver();
+				}
+				draw_rows(1);
+				time_to_shift = 0;
 			}
 		}
 
@@ -208,12 +246,14 @@ namespace BreakoutGame
 			}
 			else if (e.KeyCode == Keys.Space && ball_speed == 0)    //pokrece igru
             {
-				ball_speed = 9;
+				ball_speed = 10;
 				//odredi kut pod kojim ce loptica biti ispaljena
 				double kut = 0.3 + rnd.NextDouble() * (2.8 - 0.3);
 				ballY = -Math.Sin(kut) * ball_speed;
 				ballX = Math.Cos(kut) * ball_speed;
 				textBox1.Text = "";
+
+				//zapocni timer u za igru u sekundama
 				timer1.Start();
 			}
 		}
@@ -234,28 +274,16 @@ namespace BreakoutGame
 				placeBlocks();
 			}
 		}
-
-        private void scoreText_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void Player_Click(object sender, EventArgs e)
-        {
-
-        }
-
+		//broji vrijeme u sekundama
         private void timer1_Tick(object sender, EventArgs e)
         {
 			counter++;
 			int seconds = counter % 60;
 			int minutes = counter / 60;
 			label2.Text = minutes.ToString("D2") + ":" + seconds.ToString("D2");
+
+			time_to_shift++;
+			
 		}
     }
 }

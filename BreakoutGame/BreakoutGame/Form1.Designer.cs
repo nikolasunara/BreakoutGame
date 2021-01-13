@@ -34,9 +34,9 @@
             this.ball = new System.Windows.Forms.PictureBox();
             this.player = new System.Windows.Forms.PictureBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.ball)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.player)).BeginInit();
@@ -59,7 +59,6 @@
             this.scoreText.Size = new System.Drawing.Size(86, 31);
             this.scoreText.TabIndex = 3;
             this.scoreText.Text = "label1";
-            this.scoreText.Click += new System.EventHandler(this.scoreText_Click);
             // 
             // ball
             // 
@@ -82,7 +81,6 @@
             this.player.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.player.TabIndex = 1;
             this.player.TabStop = false;
-            this.player.Click += new System.EventHandler(this.Player_Click);
             // 
             // splitContainer1
             // 
@@ -111,10 +109,31 @@
             this.splitContainer1.Panel2.Controls.Add(this.ball);
             this.splitContainer1.Panel2.Controls.Add(this.player);
             this.splitContainer1.Panel2.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.splitContainer1.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel2_Paint);
             this.splitContainer1.Size = new System.Drawing.Size(903, 597);
             this.splitContainer1.SplitterDistance = 165;
             this.splitContainer1.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 22.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label2.Location = new System.Drawing.Point(33, 503);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(115, 44);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "00:00";
+            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.label1.Location = new System.Drawing.Point(35, 467);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(109, 36);
+            this.label1.TabIndex = 5;
+            this.label1.Text = "Time:";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // textBox1
             // 
@@ -128,28 +147,6 @@
             this.textBox1.ReadOnly = true;
             this.textBox1.Size = new System.Drawing.Size(149, 191);
             this.textBox1.TabIndex = 4;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Verdana", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label1.Location = new System.Drawing.Point(35, 467);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(109, 36);
-            this.label1.TabIndex = 5;
-            this.label1.Text = "Time:";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 22.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.label2.Location = new System.Drawing.Point(33, 503);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(115, 44);
-            this.label2.TabIndex = 6;
-            this.label2.Text = "00:00";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // timer1
             // 
