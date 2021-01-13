@@ -145,6 +145,12 @@
   <data name="yellowBrick" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\yellowBrick.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="bonus100" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bonus100.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="bonus50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\bonus50.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="brokenDarkGreenBrick" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\brokenDarkGreenBrick.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -157,7 +163,19 @@
   <data name="darkGreenBrick" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\darkGreenBrick.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="destroy" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\destroy.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="fast" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\fast.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="newBall" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\newBall.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="purpleBrick" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\purpleBrick.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="slow" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\slow.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

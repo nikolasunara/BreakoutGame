@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BreakoutGame
 {
-    class Block
+    class Block 
     {
         private string color;
    

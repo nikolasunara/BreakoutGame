@@ -29,6 +29,12 @@ namespace BreakoutGame
 		//PictureBox[] blockArray;
 		List<PictureBox> blockArray = new List<PictureBox>();
 
+		//Lista posebnih efekata. Ideja je naslijediti PictureBox u klasama 
+		//Block i Effect. Za sad samo postavljamo te klasekao Tag. Ako se pokaze kao
+		//nepotrebno, kasnije cu maknuti/doraditi.
+		//List<Effect> effectsList = new List<Effect>();
+		List<PictureBox> effectList = new List<PictureBox>();
+
 		Random rnd = new Random();
 
 
@@ -96,41 +102,65 @@ namespace BreakoutGame
 					 * Crvena cigla: obicna cigla koja puca nakon prvog udarca. 
 					 * Zuta cigla: obicna cigla koja puca nakon prvog udarca.
 					 * Tamnozelena cigla: nakon prvog udarca napukne, nakog drugog skroz puca. Nosi vise bodova.
-					 * Purpurna cigla: kad se razbija dogodi se neki efekt. 
+					 * Purpurna cigla: kad se razbija dogodi se neki padajuci efekt - fast, slow, +50, +100... 
+					 * Destroy cigla - unisti svoje susjede
+					 * NewBall cigla - stvara neki broj novih loptica.
 					 * 
-					 * 
-					 * Uzimamo random broj izmedu 0 i 1. Ako je u intervalu [0, 0.35] onda stvaramo 
-					 * zutu ciglu, ako je u <0.35, 0.7] onda crvenu, ako je u <0.7, 0.9] stvaramo 
-					 * tamnozelenu, a inace (<0.9, 1]) crvenu.
+					 * Uzimamo random broj izmedu 0 i 1. Ako je u intervalu [0, 0.30] onda stvaramo 
+					 * zutu ciglu, ako je u <0.30, 0.6] onda crvenu, ako je u <0.6, 0.75] stvaramo 
+					 * tamnozelenu, a inace (<0.75, 0.85]) crvenu. Za <0.85, 0.93] Destroy cigla, a
+					 * <0.93, 1] NewBall cigla.
 					 * Korigirat ove brojeve u testnoj fazi.
+					 * 
+					 * Ovi brojevi trenutno promijenjeni radi testiranja.
 					 */
+
 					double odluka_boje = rnd.NextDouble();
-					if(odluka_boje <= 0.35)
+					bool is_effect = false;
+					if(odluka_boje <= 0.10)
                     {
 						block.BackgroundImage = Properties.Resources.yellowBrick;
 						block.Tag = new Block { blockColor = "yellow" };
 					}
-					else if (odluka_boje <= 0.7)
+					else if (odluka_boje <= 0.2) //0.6
                     {
 						block.BackgroundImage = Properties.Resources.redBrick2;
 						block.Tag = new Block { blockColor = "red" };
 					}
-					else if(odluka_boje <= 0.9)
+					else if(odluka_boje <= 0.3) //0.75
                     {
 						block.BackgroundImage = Properties.Resources.darkGreenBrick;
 						block.Tag = new Block { blockColor = "darkGreen" };
 
 					}
-					else
+					else if(odluka_boje <= 0.85) // 0.85
                     {
 						block.BackgroundImage = Properties.Resources.purpleBrick;
 						block.Tag = new Block { blockColor = "purple" };
 
 					}
+					else if (odluka_boje <= 0.93)
+                    {
+						block.BackgroundImage = Properties.Resources.destroy;
+						block.Tag = new Effect { Mobile = false, Description = "destroy" };
+						is_effect = true;
+					}
+                    else
+                    {
+						block.BackgroundImage = Properties.Resources.newBall;
+						block.Tag = new Effect { Mobile = false, Description = "newBall" };
+						is_effect = true;
+					}
 
 					block.BackgroundImageLayout = ImageLayout.Stretch;
+					
+					//Malo nezgodna notacija "block". Ako je nastao efekt newBall ili desroy spremamo
+					//u listu efekata.
+					if (!is_effect)
+						blockArray.Add(block);
+					else 
+						effectList.Add(block);
 
-					blockArray.Add(block);
 					this.splitContainer1.Panel2.Controls.Add(block);
 
 					left += width;
@@ -197,8 +227,21 @@ namespace BreakoutGame
 				ballY = -ballY;
 			}
 
+			//Pomicemo padajuce efekte. Dodati slucaj kada udari u igracevu plocu. 
+			//Loptica samo prolazi kroz efekte.
+			foreach (var ef in effectList)
+			{
+				Effect effectTag = (Effect)ef.Tag;
+				//Imamo dvije vrste efekata. Staticni su oni koji stoje na pozicijama kao cigle (destroy i newBall).
+				//Padajuci efekti su bonusi na bodove, te usporavanje i ubrzavanje loptice. Potrebno ih je realizirati.
+				if(effectTag.Mobile)
+					ef.Top += 10;
+				if (ef.Top + 10 > player.Top)
+					this.splitContainer1.Panel2.Controls.Remove(ef);
+			}
+
 			//Lopta udara u igraca
-			if(ball.Bounds.IntersectsWith(player.Bounds))
+			if (ball.Bounds.IntersectsWith(player.Bounds))
 			{
 				ballY = -ballY;
 				//pozicija gdje loptica udara o plocu
@@ -220,12 +263,13 @@ namespace BreakoutGame
 			// Provjeri dodiruje li lopta neku ciglu
 			foreach (Control x in this.splitContainer1.Panel2.Controls)
 			{
+				//Gledamo presjek lopte s ciglama.
 				if (x is PictureBox && x.Tag is Block)
 				{
 					if(ball.Bounds.IntersectsWith(x.Bounds))
 					{
-						Block block = (Block)x.Tag;
-                        if (block.blockColor == "darkGreen")
+						Block blockTag = (Block)x.Tag;
+                        if (blockTag.blockColor == "darkGreen")
                         {
 							//Cigla je napukla.
 							x.BackgroundImage = Properties.Resources.brokenDarkGreenBrick;
@@ -237,16 +281,17 @@ namespace BreakoutGame
                         else
                         {
 							//Razbili smo ciglu.
-							if(block.blockColor == "brokenDarkGreen")
+							if(blockTag.blockColor == "brokenDarkGreen")
                             {
 								//Promijeniti po zelji. Drugi udarac u ciglu, pa malo veca nagrada.
-								score += 3;
+								score += 50;
                             }
 							else 
-								score += 1;
+								score += 10;
 							
 							ballY = -ballY;
 
+							//Mozda i maknuti iz liste cigli, ne samo iz kontrola?
 							this.splitContainer1.Panel2.Controls.Remove(x);
 
 							// azuriraj lowest
@@ -255,7 +300,74 @@ namespace BreakoutGame
 									blockArray.Remove(t);
 								else*/
 								lowest = (t.Top > lowest) ? t.Top : lowest;
+
+
+                            //Ako smo pogidili ciglu koja stvara padajuci efekt, ovdje ga stvaramo.
+                            //Od njega se loptica ne odbija vec samo prolazi preko njega. Cilj ga je 
+                            //skupiti igracom plocom.
+                            if (blockTag.blockColor == "purple")
+                            {
+								//Sirina bloka.
+								int width = (int)(splitContainer1.Panel2.Width - 14) / 10;
+								//stvori blok i postavi mu svojstva
+								var effect = new PictureBox();
+
+								effect.Height = 32;
+								effect.Width = width;
+								effect.BackColor = Color.White;
+								//Stvaramo padajuci efekt na mjestu razbijene cigle x.
+								effect.Left = x.Left;
+								effect.Top = x.Top;
+
+
+								double effect_decision = rnd.NextDouble();
+								if (effect_decision <= 0.3)
+								{
+									//Stvaramo efekt +50.
+									effect.BackgroundImage = Properties.Resources.bonus50;
+									effect.Tag = new Effect { Mobile = true, Description = "bonus50" };
+								}
+								else if (effect_decision <= 0.5)
+								{
+									//Stvaramo efekt +100.
+									effect.BackgroundImage = Properties.Resources.bonus100;
+									effect.Tag = new Effect { Mobile = true, Description = "bonus100" };
+								}
+								else if (effect_decision <= 0.75)
+								{
+									//Stvaramo efekt Slow - usporavanje loptice za neki (odrediti) koeficijent.
+
+									effect.BackgroundImage = Properties.Resources.slow;
+									effect.Tag = new Effect { Mobile = true, Description = "slow" };
+								}
+								else
+								{
+									//Stvaramo efekt Fast - ubrzanje loptice za neki (odrediti) koeficijent.
+									effect.BackgroundImage = Properties.Resources.fast;
+									effect.Tag = new Effect { Mobile = true, Description = "fast" };
+								}
+
+								effect.BackgroundImageLayout = ImageLayout.Stretch;
+								effectList.Add(effect);
+								this.splitContainer1.Panel2.Controls.Add(effect);
+
+							}
+
 						}
+					}
+				}
+				else if (x is PictureBox && x.Tag is Effect)
+                {
+					//Ovdje dolazi imeplementacija efekata.
+					//Padajuce efekte dodir s lopticom ne smeta, samo prolazi kroz nju. Oni se skupljaju
+					//pomocu igrace ploce.
+					//Staticke efekte skupljamo kad ih loptica pogodi. Tu za sad ide samo implementacija da oni
+					//nestanu kad ih se pogodi, no potrebna je jos realizacija.
+					Effect effectTag = (Effect)x.Tag;
+                    if (ball.Bounds.IntersectsWith(x.Bounds) && !effectTag.Mobile)
+                    {
+						//Dodati jos brisanje iz liste efekata, kao sto treba i za cigle.
+						this.splitContainer1.Panel2.Controls.Remove(x);
 					}
 				}
 			}
@@ -277,6 +389,15 @@ namespace BreakoutGame
 						return;
 
 				}
+				foreach (var x in effectList)
+				{
+					Effect effectTag = (Effect)x.Tag;
+					//Rectangle rect = new Rectangle(x.Left, x.Top + , x.Width, 32);
+					if ( !effectTag.Mobile &&  ball.Bounds.IntersectsWith(x.Bounds))
+						return;
+
+				}
+
 				//ako je doslo do tu znaci da se moze pomaknuti
 				foreach (var x in blockArray)
 				{
@@ -285,10 +406,23 @@ namespace BreakoutGame
 					if (x.Top + 33 > player.Top)
 						gameOver();
 				}
+				foreach (var x in effectList)
+				{
+					Effect effectTag = (Effect)x.Tag;
+                    if (!effectTag.Mobile)
+                    {
+						x.Top += 33;
+						lowest += 33;
+						if (x.Top + 33 > player.Top)
+							gameOver();
+					}
+					
+				}
 				draw_rows(1);
 				time_to_shift = 0;
 			}
 		}
+
 
 		private void keyisdown(object sender, KeyEventArgs e)
 		{

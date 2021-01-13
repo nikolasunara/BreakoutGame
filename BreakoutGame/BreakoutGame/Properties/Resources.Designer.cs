@@ -73,6 +73,26 @@ namespace BreakoutGame.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap bonus100 {
+            get {
+                object obj = ResourceManager.GetObject("bonus100", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap bonus50 {
+            get {
+                object obj = ResourceManager.GetObject("bonus50", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap brokenDarkGreenBrick {
             get {
                 object obj = ResourceManager.GetObject("brokenDarkGreenBrick", resourceCulture);
@@ -143,9 +163,39 @@ namespace BreakoutGame.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap destroy {
+            get {
+                object obj = ResourceManager.GetObject("destroy", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap fast {
+            get {
+                object obj = ResourceManager.GetObject("fast", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap greenBrick {
             get {
                 object obj = ResourceManager.GetObject("greenBrick", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap newBall {
+            get {
+                object obj = ResourceManager.GetObject("newBall", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -186,6 +236,16 @@ namespace BreakoutGame.Properties {
         internal static System.Drawing.Bitmap redBrick2 {
             get {
                 object obj = ResourceManager.GetObject("redBrick2", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap slow {
+            get {
+                object obj = ResourceManager.GetObject("slow", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

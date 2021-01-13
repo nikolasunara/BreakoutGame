@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Block.cs" />
+    <Compile Include="Effect.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -128,6 +129,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\purpleBrick.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bonus50.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\bonus100.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\fast.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\slow.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\newBall.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\destroy.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
