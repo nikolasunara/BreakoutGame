@@ -12,6 +12,7 @@ namespace BreakoutGame
 
 		int score;
 		int playerSpeed;
+		int counter;			//broji vrijeme igre
 		double ball_speed;
 
 		//Ove varijable sluze za pokretanje loptice. Pomicemo ju tako da
@@ -36,9 +37,11 @@ namespace BreakoutGame
 		{
 			isGameOver = false;
 			score = 0;
+			counter = 0;
 			playerSpeed = 12;
 			scoreText.Text = "Score: " + score;
 			textBox1.Text = "Press SPACE to start the game";
+			label2.Text = "00:00";
 
 			//na pocetku je loptica nepomicna, tj. stoji na ploci
 			ball_speed = 0;
@@ -119,6 +122,7 @@ namespace BreakoutGame
 		{
 			isGameOver = true;
 			gameTimer.Stop();
+			timer1.Stop();
 			scoreText.Text = "Score: " + score;
 			textBox1.Text = message;
 		}
@@ -202,7 +206,7 @@ namespace BreakoutGame
 			{
 				goRight = true;
 			}
-			else if (e.KeyCode == Keys.Space && ball_speed == 0)
+			else if (e.KeyCode == Keys.Space && ball_speed == 0)    //pokrece igru
             {
 				ball_speed = 9;
 				//odredi kut pod kojim ce loptica biti ispaljena
@@ -210,6 +214,7 @@ namespace BreakoutGame
 				ballY = -Math.Sin(kut) * ball_speed;
 				ballX = Math.Cos(kut) * ball_speed;
 				textBox1.Text = "";
+				timer1.Start();
 			}
 		}
 
@@ -244,5 +249,13 @@ namespace BreakoutGame
         {
 
         }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+			counter++;
+			int seconds = counter % 60;
+			int minutes = counter / 60;
+			label2.Text = minutes.ToString("D2") + ":" + seconds.ToString("D2");
+		}
     }
 }
