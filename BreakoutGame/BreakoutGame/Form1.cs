@@ -72,7 +72,7 @@ namespace BreakoutGame
 			//pripremi igru
 			setupGame();
 		}
-		private void draw_rows(int n) //crta n redova kocki
+		private void draw_rows(int n) //crta n redova kocki, u svakom redu uvijek 10 kocki
         {
 			int top = 5;
 			int left = 1;
@@ -86,13 +86,48 @@ namespace BreakoutGame
 					var block = new PictureBox();
 					block.Height = 32;
 					block.Width = width;
-					block.Tag = "blocks";
+					//block.Tag = "blocks";
 					block.BackColor = Color.White;
 					block.Left = left;
 					block.Top = top;
 
 					block.BackColor = Color.Gray;
-					block.BackgroundImage = Properties.Resources.redBrick;
+					/*
+					 * Crvena cigla: obicna cigla koja puca nakon prvog udarca. 
+					 * Zuta cigla: obicna cigla koja puca nakon prvog udarca.
+					 * Tamnozelena cigla: nakon prvog udarca napukne, nakog drugog skroz puca. Nosi vise bodova.
+					 * Purpurna cigla: kad se razbija dogodi se neki efekt. 
+					 * 
+					 * 
+					 * Uzimamo random broj izmedu 0 i 1. Ako je u intervalu [0, 0.35] onda stvaramo 
+					 * zutu ciglu, ako je u <0.35, 0.7] onda crvenu, ako je u <0.7, 0.9] stvaramo 
+					 * tamnozelenu, a inace (<0.9, 1]) crvenu.
+					 * Korigirat ove brojeve u testnoj fazi.
+					 */
+					double odluka_boje = rnd.NextDouble();
+					if(odluka_boje <= 0.35)
+                    {
+						block.BackgroundImage = Properties.Resources.yellowBrick;
+						block.Tag = new Block { blockColor = "yellow" };
+					}
+					else if (odluka_boje <= 0.7)
+                    {
+						block.BackgroundImage = Properties.Resources.redBrick2;
+						block.Tag = new Block { blockColor = "red" };
+					}
+					else if(odluka_boje <= 0.9)
+                    {
+						block.BackgroundImage = Properties.Resources.darkGreenBrick;
+						block.Tag = new Block { blockColor = "darkGreen" };
+
+					}
+					else
+                    {
+						block.BackgroundImage = Properties.Resources.purpleBrick;
+						block.Tag = new Block { blockColor = "purple" };
+
+					}
+
 					block.BackgroundImageLayout = ImageLayout.Stretch;
 
 					blockArray.Add(block);
@@ -185,21 +220,42 @@ namespace BreakoutGame
 			// Provjeri dodiruje li lopta neku ciglu
 			foreach (Control x in this.splitContainer1.Panel2.Controls)
 			{
-				if (x is PictureBox && x.Tag is "blocks")
+				if (x is PictureBox && x.Tag is Block)
 				{
 					if(ball.Bounds.IntersectsWith(x.Bounds))
 					{
-						score += 1;
-						ballY = -ballY;
+						Block block = (Block)x.Tag;
+                        if (block.blockColor == "darkGreen")
+                        {
+							//Cigla je napukla.
+							x.BackgroundImage = Properties.Resources.brokenDarkGreenBrick;
+							x.Tag = new Block { blockColor = "brokenDarkGreen" };
+							//this.splitContainer1.Panel2.Controls.
 
-						this.splitContainer1.Panel2.Controls.Remove(x);
-						
-						// azuriraj lowest
-						foreach (var t in blockArray)
-							/*if (t.Top == x.Top && t.Left == x.Left)
-								blockArray.Remove(t);
-							else*/
+							ballY = -ballY;
+						}
+                        else
+                        {
+							//Razbili smo ciglu.
+							if(block.blockColor == "brokenDarkGreen")
+                            {
+								//Promijeniti po zelji. Drugi udarac u ciglu, pa malo veca nagrada.
+								score += 3;
+                            }
+							else 
+								score += 1;
+							
+							ballY = -ballY;
+
+							this.splitContainer1.Panel2.Controls.Remove(x);
+
+							// azuriraj lowest
+							foreach (var t in blockArray)
+								/*if (t.Top == x.Top && t.Left == x.Left)
+									blockArray.Remove(t);
+								else*/
 								lowest = (t.Top > lowest) ? t.Top : lowest;
+						}
 					}
 				}
 			}
@@ -211,7 +267,7 @@ namespace BreakoutGame
 
 			//ako je proslo bar 5 sek od zadnjeg dodavanja probaj dodat novi red na vrh
 			//poslije cemo staviti vece
-			if (time_to_shift > 2)
+			if (time_to_shift > 20)
 			{
 				//prvo provjeri moze li se pomaknuti 
 				foreach (var x in blockArray)

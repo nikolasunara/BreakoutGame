@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Block.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -91,6 +92,42 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\redBrick.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image1.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\yellowBrick.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\brokenYellowBrick.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\redBrick2.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\greenBrick.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\brokenGreenBrick.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\brokenPurpleBrick.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IMG_20210113_142158.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\brokenDarkGreenBrick.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\darkGreenBrick.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\brokenRedBrick2.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\purpleBrick.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
