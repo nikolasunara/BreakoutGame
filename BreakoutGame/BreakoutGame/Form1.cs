@@ -346,8 +346,6 @@ namespace BreakoutGame
 				//Gledamo presjek lopte s ciglama.
 				if (ball.Bounds.IntersectsWith(x.Bounds) && x is PictureBox)
 				{
-					//funkcija koja unistava ciglu x
-					destroyBlock(x);
 					//preusmjeri lopticu tj. promijeni ballX ili ballY
 					// jos uvijek se ne odbija savrseno ali bar je puno bolje nego prije
 					if (x.Tag is Block)
@@ -357,13 +355,45 @@ namespace BreakoutGame
 						int ball_center_X = ball.Left + (int)(ball.Width / 2);
 						int ball_center_Y = ball.Top + (int)(ball.Height / 2);
 
-						if (ball_center_Y > x.Top + x.Height || ball_center_Y < x.Top)
+						if ((ball_center_X >= x.Left && ball_center_X <= x.Right && ball.Top <= x.Bottom) ||
+								(ball_center_X >= x.Left && ball_center_X <= x.Right && ball.Bottom >= x.Top))
 							//dolazi s gornje ili donje strane
 							ballY = -ballY;
-						else
+						else if ((ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && ball.Right >= x.Left) ||
+								(ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && ball.Left <= x.Right))
+							//dolazi s lijeva ili desna
 							ballX = -ballX;
+                        else if ( (ball_center_X < x.Left && ball.Top <= x.Bottom) ||
+									(ball_center_Y > x.Bottom  && ball.Right >= x.Left))
+							//udara u lijevi donji rub
+                        {
+							ballY = Math.Abs(ballY);
+							ballX = -Math.Abs(ballX);
+                        }
+						else if ((ball_center_X > x.Right && ball.Top <= x.Bottom) ||
+									(ball_center_Y > x.Bottom && ball.Left <= x.Right))
+							//udara u desni donji rub
+						{
+							ballY = Math.Abs(ballY);
+							ballX = Math.Abs(ballX);
+						}
+						else if ((ball_center_X < x.Left && ball.Bottom >= x.Top) ||
+									(ball_center_Y < x.Top && ball.Right >= x.Left))
+							//udara u gornji lijevi rub
+						{
+							ballY = -Math.Abs(ballY);
+							ballX = -Math.Abs(ballX);
+						}
+						else if ((ball_center_X > x.Right && ball.Bottom >= x.Top) ||
+									(ball_center_Y < x.Top && ball.Left <= x.Right))
+							//udara i gornji desni rub
+						{
+							ballY = -Math.Abs(ballY);
+							ballX = Math.Abs(ballX);
+						}
 					}
-
+					//funkcija koja unistava ciglu x
+					destroyBlock(x);
 				}
 			}
 		}
