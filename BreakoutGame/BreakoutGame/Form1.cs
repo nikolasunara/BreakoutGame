@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace BreakoutGame
 {
-    public partial class Form1 : Form
+	public partial class Form1 : Form
 	{
 		bool goLeft;
 		bool goRight;
@@ -17,18 +17,22 @@ namespace BreakoutGame
 
 		int counter;            //broji vrijeme igre
 		int time_to_shift;      //broji vrijeme do pomaka kocki prema dolje	
-		
-		double ball_speed;		//trenutna brzina loptice
+
+		double ball_speed;      //trenutna brzina loptice
 		double standard_ball_speed;  //uvijek standardna brzina
 		int fast_slow_time;
 
-		int lowest;				//prati poziciju najdonje kocke
+		int lowest;             //prati poziciju najdonje kocke
 
 		//Ove varijable sluze za pokretanje loptice. Pomicemo ju tako da
 		//poziciji loptice dodamo ballX s lijeve, odnosno ballY s gornje strane.
 		//Uvijek vrijedi ballX^2 + ballY^2 = ball_speed^2
-		double ballX;
-		double ballY;
+		
+		//Postavljamo stvari za situaciju s vise loptica u igri. Umjesto jedne loptice, imat cemo niz loptica
+		//(najcesce ce u nizu biti samo jedna loptica, osim kada pokupimo efekt za vise njih).
+		List<double> ballXList = new List<double>();
+		List<double> ballYList = new List<double>();
+		List<PictureBox> ballList = new List<PictureBox>();
 
 		//PictureBox[] blockArray;
 		List<PictureBox> blockList = new List<PictureBox>();
@@ -47,6 +51,7 @@ namespace BreakoutGame
 			InitializeComponent();
 
 			placeBlocks();
+
 		}
 
 		private void setupGame() 
@@ -62,17 +67,32 @@ namespace BreakoutGame
 			textBox1.Text = "Press SPACE to start the game";
 			label2.Text = "00:00";
 
-			//na pocetku je loptica nepomicna, tj. stoji na ploci
-			ball_speed = 0;
-			standard_ball_speed = 0;
-			ballX = 0;
-			ballY = 0;
 
 			//namjesti plocu na sredinu
 			player.Left = (int)(splitContainer1.Panel2.Width / 2 - player.Width / 2);
-			//namjesti lopticu na sredinu ploce
-			ball.Left = player.Left + player.Width / 2 - ball.Width/2;
-			ball.Top = player.Top - ball.Height;
+
+			//na pocetku je loptica nepomicna, tj. stoji na ploci
+			ball_speed = 0;
+			standard_ball_speed = 0;
+			
+			//Sve loptce ce imati istu brzinu u svakom trenutku.
+			//Stvaramo pocetnu lopticu.
+			var ballFirst = new PictureBox();
+			ballFirst.Height = 26;
+			ballFirst.Width = 26;
+			ballFirst.BackColor = SystemColors.ControlDarkDark;
+			//Ako zelimo smjestiti lopticu na sredinu ploce 
+			//ballFirst.Left = (int)(splitContainer1.Panel2.Width) / 2  - ballFirst.Width / 2;
+			//ballFirst.Top = (int)(splitContainer1.Panel2.Height) / 2  - ballFirst.Height / 2;
+			ballFirst.Left = player.Left + player.Width / 2 - ballFirst.Width / 2;
+			ballFirst.Top = player.Top - ballFirst.Height;
+			ballFirst.BackgroundImage = Properties.Resources.circle_cropped;
+			ballFirst.BackgroundImageLayout = ImageLayout.Stretch;
+			ballList.Add(ballFirst);
+			this.splitContainer1.Panel2.Controls.Add(ballFirst);
+			ballXList.Add(0);
+			ballYList.Add(0);
+
 
 			gameTimer.Start();
 		}
@@ -98,8 +118,6 @@ namespace BreakoutGame
 					var block = new PictureBox();
 					block.Height = 32;
 					block.Width = width;
-					//block.Tag = "blocks";
-					block.BackColor = Color.White;
 					block.Left = left;
 					block.Top = top;
 
@@ -139,13 +157,13 @@ namespace BreakoutGame
 						block.Tag = new Block { blockColor = "darkGreen" };
 
 					}
-					else if(odluka_boje <= 0.85) // 0.85
+					else if(odluka_boje <= 0.75) // 0.85
                     {
 						block.BackgroundImage = Properties.Resources.purpleBrick;
 						block.Tag = new Block { blockColor = "purple" };
 
 					}
-					else if (odluka_boje <= 0.9) //0.95
+					else if (odluka_boje <= 0.85) //0.95
                     {
 						block.BackgroundImage = Properties.Resources.destroy;
 						block.Tag = new Effect { Mobile = false, Description = "destroy" };
@@ -215,18 +233,37 @@ namespace BreakoutGame
 			{
 				player.Left -= playerSpeed;
 				if (ball_speed == 0.0)
-					ball.Left -= playerSpeed;
+                {
+					//Ovakav kod zna dati bug ako se ubaci naknadno loptica u ballList
+					/*
+					foreach(PictureBox mBall in ballList)
+                    {
+						mBall.Left -= playerSpeed;
+                    }
+					*/
+					for (int i = 0; i < ballList.Count; ++i)
+						ballList[i].Left -= playerSpeed;
+				}
 			}
 			if (goRight == true && player.Right < splitContainer1.Panel2.Width - 7) 
 			{
 				player.Left += playerSpeed;
 				if (ball_speed == 0.0)
-					ball.Left += playerSpeed;
+                {
+					for (int i = 0; i < ballList.Count; ++i)
+						ballList[i].Left -= playerSpeed;
+				}
+					
 			}
 
-			//pomakni lopticu
-			ball.Left += (int)ballX;
-			ball.Top += (int)ballY;
+			//Pomicemo sve loptice na ploci
+            for(int tmpCounter = 0; tmpCounter < ballList.Count; ++tmpCounter)
+            {
+				PictureBox mBall = ballList[tmpCounter];
+
+				mBall.Left += (int)ballXList[tmpCounter];
+				mBall.Top += (int)ballYList[tmpCounter];
+            }
 
 			//Lopta udara u rub prozora
 			provjeriUdaranjeOdRub();
@@ -288,10 +325,26 @@ namespace BreakoutGame
 			// Provjeri dodiruje li lopta neku ciglu
 			provjeriUdarenjeOdCiglu();
 
-			if(ball.Top > player.Top)
-			{
-				gameOver();
+			//Provjera je li neka od loptica izasla iz granica polja.
+			//Moramo ici u obrnutom smjeru zbog brisanja na odgovarajucim indeksima u listama ballXList i ballYList.
+			//Inace bi obrisali manji indeks pa u iducem brisanju utjecali na pogresan element.
+			for(int i = ballList.Count - 1; i >= 0; --i)
+            {
+				PictureBox mBall = ballList[i];
+				if (mBall.Top > player.Top)
+				{
+					//Izbacujemo neku od loptica.
+					ballList.Remove(mBall);
+					this.splitContainer1.Panel2.Controls.Remove(mBall);
+					ballXList.RemoveAt(i);
+					ballYList.RemoveAt(i);
+				}
 			}
+			//Ako su sve loptice izasle onda je kraj igre.
+			if(ballList.Count == 0)
+            {
+				gameOver();
+            }
 
 			//ako je proslo bar 5 sek od zadnjeg dodavanja probaj dodat novi red na vrh
 			//poslije cemo staviti vece
@@ -301,16 +354,18 @@ namespace BreakoutGame
 				foreach (var x in blockList)
 				{
 					//Rectangle rect = new Rectangle(x.Left, x.Top + , x.Width, 32);
-					if (ball.Bounds.IntersectsWith(x.Bounds))
-						return;
+					for(int i = 0; i < ballList.Count; ++i)
+						if (ballList[i].Bounds.IntersectsWith(x.Bounds))
+							return;
 
 				}
 				foreach (var x in effectList)
 				{
 					Effect effectTag = (Effect)x.Tag;
 					//Rectangle rect = new Rectangle(x.Left, x.Top + , x.Width, 32);
-					if ( !effectTag.Mobile &&  ball.Bounds.IntersectsWith(x.Bounds))
-						return;
+					for(int i = 0; i < ballList.Count; ++i)
+						if ( !effectTag.Mobile &&  ballList[i].Bounds.IntersectsWith(x.Bounds))
+							return;
 
 				}
 
@@ -341,114 +396,132 @@ namespace BreakoutGame
 
 		private void provjeriUdarenjeOdCiglu()
         {
-			foreach (Control x in this.splitContainer1.Panel2.Controls)
-			{
-				//Gledamo presjek lopte s ciglama.
-				if (ball.Bounds.IntersectsWith(x.Bounds) && x is PictureBox)
-				{
-					//preusmjeri lopticu tj. promijeni ballX ili ballY
-					// jos uvijek se ne odbija savrseno ali bar je puno bolje nego prije
-					//Loptica se obija i od statickih efekata jednako kao i od cigli.
-					if (x.Tag is Block || (x.Tag is Effect && !((Effect)x.Tag).Mobile ))
-					{
-						//provjeravanje s koje strane lopta dolazi
-						//trazimo centar lopte te usporedujemo
-						int ball_center_X = ball.Left + (int)(ball.Width / 2);
-						int ball_center_Y = ball.Top + (int)(ball.Height / 2);
 
-						if ((ball_center_X >= x.Left && ball_center_X <= x.Right && ball.Top <= x.Bottom) ||
-								(ball_center_X >= x.Left && ball_center_X <= x.Right && ball.Bottom >= x.Top))
-							//dolazi s gornje ili donje strane
-							ballY = -ballY;
-						else if ((ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && ball.Right >= x.Left) ||
-								(ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && ball.Left <= x.Right))
-							//dolazi s lijeva ili desna
-							ballX = -ballX;
-                        else if ( (ball_center_X < x.Left && ball.Top <= x.Bottom) ||
-									(ball_center_Y > x.Bottom  && ball.Right >= x.Left))
+			for(int tmpCounter = 0; tmpCounter < ballList.Count; ++tmpCounter)
+            {
+				PictureBox mBall = ballList[tmpCounter];
+
+				foreach (Control x in this.splitContainer1.Panel2.Controls)
+				{
+					//Gledamo presjek lopte s ciglama.
+					if (mBall.Bounds.IntersectsWith(x.Bounds) && x is PictureBox)
+					{
+						//preusmjeri lopticu tj. promijeni ballX ili ballY
+						// jos uvijek se ne odbija savrseno ali bar je puno bolje nego prije
+						//Loptica se obija i od statickih efekata jednako kao i od cigli.
+						if (x.Tag is Block || (x.Tag is Effect && !((Effect)x.Tag).Mobile))
+						{
+							//provjeravanje s koje strane lopta dolazi
+							//trazimo centar lopte te usporedujemo
+							int ball_center_X = mBall.Left + (int)(mBall.Width / 2);
+							int ball_center_Y = mBall.Top + (int)(mBall.Height / 2);
+
+							if ((ball_center_X >= x.Left && ball_center_X <= x.Right && mBall.Top <= x.Bottom) ||
+									(ball_center_X >= x.Left && ball_center_X <= x.Right && mBall.Bottom >= x.Top))
+								//dolazi s gornje ili donje strane
+								ballYList[tmpCounter] = -ballYList[tmpCounter];
+							else if ((ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && mBall.Right >= x.Left) ||
+									(ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && mBall.Left <= x.Right))
+								//dolazi s lijeva ili desna
+								ballXList[tmpCounter] = -ballXList[tmpCounter];
+							else if ((ball_center_X < x.Left && mBall.Top <= x.Bottom) ||
+										(ball_center_Y > x.Bottom && mBall.Right >= x.Left))
 							//udara u lijevi donji rub
-                        {
-							ballY = Math.Abs(ballY);
-							ballX = -Math.Abs(ballX);
-                        }
-						else if ((ball_center_X > x.Right && ball.Top <= x.Bottom) ||
-									(ball_center_Y > x.Bottom && ball.Left <= x.Right))
+							{
+								ballYList[tmpCounter] = Math.Abs(ballYList[tmpCounter]);
+								ballXList[tmpCounter] = -Math.Abs(ballXList[tmpCounter]);
+							}
+							else if ((ball_center_X > x.Right && mBall.Top <= x.Bottom) ||
+										(ball_center_Y > x.Bottom && mBall.Left <= x.Right))
 							//udara u desni donji rub
-						{
-							ballY = Math.Abs(ballY);
-							ballX = Math.Abs(ballX);
-						}
-						else if ((ball_center_X < x.Left && ball.Bottom >= x.Top) ||
-									(ball_center_Y < x.Top && ball.Right >= x.Left))
+							{
+								ballYList[tmpCounter] = Math.Abs(ballYList[tmpCounter]);
+								ballXList[tmpCounter] = Math.Abs(ballXList[tmpCounter]);
+							}
+							else if ((ball_center_X < x.Left && mBall.Bottom >= x.Top) ||
+										(ball_center_Y < x.Top && mBall.Right >= x.Left))
 							//udara u gornji lijevi rub
-						{
-							ballY = -Math.Abs(ballY);
-							ballX = -Math.Abs(ballX);
-						}
-						else if ((ball_center_X > x.Right && ball.Bottom >= x.Top) ||
-									(ball_center_Y < x.Top && ball.Left <= x.Right))
+							{
+								ballYList[tmpCounter] = -Math.Abs(ballYList[tmpCounter]);
+								ballXList[tmpCounter] = -Math.Abs(ballXList[tmpCounter]);
+							}
+							else if ((ball_center_X > x.Right && mBall.Bottom >= x.Top) ||
+										(ball_center_Y < x.Top && mBall.Left <= x.Right))
 							//udara i gornji desni rub
-						{
-							ballY = -Math.Abs(ballY);
-							ballX = Math.Abs(ballX);
+							{
+								ballYList[tmpCounter] = -Math.Abs(ballYList[tmpCounter]);
+								ballXList[tmpCounter] = Math.Abs(ballXList[tmpCounter]);
+							}
 						}
+						//funkcija koja unistava ciglu ili staticki efekt x
+						destroyBlock(x);
 					}
-					//funkcija koja unistava ciglu ili staticki efekt x
-					destroyBlock(x);
 				}
-			}
+            }
 		}
 
 		private void provjeriUdaranjeOdRub()
         {
-			//Ako je lopta išla prema lijevo i udarila u lijevi rub, odbija se(isto za gore i desno),
-			if ((ball.Left < 0 && ballX < 0) || (ball.Right > splitContainer1.Panel2.Width && ballX > 0))
-			{
-				ballX = -ballX;
-			}
-			if (ball.Top < 0 && ballY < 0)
-			{
-				ballY = -ballY;
+
+			for(int tmpCounter = 0; tmpCounter < ballList.Count; ++tmpCounter)
+            {
+				PictureBox mBall = ballList[tmpCounter];
+
+				//Ako je lopta išla prema lijevo i udarila u lijevi rub, odbija se(isto za gore i desno),
+				if ((mBall.Left < 0 && ballXList[tmpCounter] < 0) || (mBall.Right > splitContainer1.Panel2.Width && ballXList[tmpCounter] > 0))
+				{
+					ballXList[tmpCounter] = -ballXList[tmpCounter];
+				}
+				if (mBall.Top < 0 && ballYList[tmpCounter] < 0)
+				{
+					ballYList[tmpCounter] = -ballYList[tmpCounter];
+				}
 			}
 		}
 
 		private void provjeriUdaranjeOdIgraca()
         {
-			if (ball.Bounds.IntersectsWith(player.Bounds))
+
+			for (int tmpCounter = 0; tmpCounter < ballList.Count; ++tmpCounter)
 			{
-				//pozicija gdje loptica udara o plocu
-				double pos = ball.Width / 2 + ball.Left;
+				PictureBox mBall = ballList[tmpCounter];
 
-				double sredina_ploce = player.Left + player.Width / 2;
-				double omjer = 2 * (pos - sredina_ploce) / player.Width;
+				if (mBall.Bounds.IntersectsWith(player.Bounds))
+				{
+					//pozicija gdje loptica udara o plocu
+					double pos = mBall.Width / 2 + mBall.Left;
 
-				//korigiranje rubnih slučajeva
-				omjer = (omjer < -1) ? -1 : omjer;
-				omjer = (omjer > 1) ? 1 : omjer;
-				//mapiranje intervala [-1,1]->[PI,0]
-				//koliko će mjesto sudaranja lopte i ploče utjecati na
-				//kut odbijanja lopte
-				double kut = Math.PI / 2 + omjer * (-Math.PI / 2);
+					double sredina_ploce = player.Left + player.Width / 2;
+					double omjer = 2 * (pos - sredina_ploce) / player.Width;
 
-				//kut_2 je "klasični kut odbijanja lopte od neke podloge
-				/*
-				double kut_2 = 0;
-				if (ballX < 0 && ballY > 0)
-					kut_2 = Math.PI - Math.Atan(ballY / -ballX);
-				else if (ballX > 0 && ballY > 0)
-					kut_2 = Math.Atan(ballY / ballX);
-				else if (ballX == 0)
-					kut_2 = Math.PI / 2;
-				*/
+					//korigiranje rubnih slučajeva
+					omjer = (omjer < -1) ? -1 : omjer;
+					omjer = (omjer > 1) ? 1 : omjer;
+					//mapiranje intervala [-1,1]->[PI,0]
+					//koliko će mjesto sudaranja lopte i ploče utjecati na
+					//kut odbijanja lopte
+					double kut = Math.PI / 2 + omjer * (-Math.PI / 2);
 
-				//nedaj kut manji od PI/7 ili veći od 6PI/7
-				kut = Math.Abs(kut) < Math.PI / 7 ? Math.PI / 7 : kut;
-				kut = Math.Abs(kut) > 6 * Math.PI / 7 ? 6 * Math.PI / 7 : kut;
+					//kut_2 je "klasični kut odbijanja lopte od neke podloge
+					/*
+					double kut_2 = 0;
+					if (ballX < 0 && ballY > 0)
+						kut_2 = Math.PI - Math.Atan(ballY / -ballX);
+					else if (ballX > 0 && ballY > 0)
+						kut_2 = Math.Atan(ballY / ballX);
+					else if (ballX == 0)
+						kut_2 = Math.PI / 2;
+					*/
 
-				ballY = -Math.Sin(kut) * ball_speed;
-				ballX = Math.Cos(kut) * ball_speed;
+					//nedaj kut manji od PI/7 ili veći od 6PI/7
+					kut = Math.Abs(kut) < Math.PI / 7 ? Math.PI / 7 : kut;
+					kut = Math.Abs(kut) > 6 * Math.PI / 7 ? 6 * Math.PI / 7 : kut;
 
-			}
+					ballYList[tmpCounter] = -Math.Sin(kut) * ball_speed;
+					ballXList[tmpCounter] = Math.Cos(kut) * ball_speed;
+
+				}
+            }
 		}
 
 
@@ -468,9 +541,11 @@ namespace BreakoutGame
 				standard_ball_speed = ball_speed;
 				//odredi kut pod kojim ce loptica biti ispaljena
 				double kut = 0.3 + rnd.NextDouble() * (2.8 - 0.3);
-				ballY = -Math.Sin(kut) * ball_speed;
-				ballX = Math.Cos(kut) * ball_speed;
 				textBox1.Text = "";
+
+				//ball_speed moze biti 0 samo kad imamo jednu lopticu, tj prije pocetka igre
+				ballXList[0] = Math.Cos(kut) * ball_speed;
+				ballYList[0] = -Math.Sin(kut) * ball_speed;
 
 				//zapocni timer u za igru u sekundama
 				timer1.Start();
@@ -614,9 +689,38 @@ namespace BreakoutGame
 					{
 						//dodati stvaranje novih loptice
 						this.splitContainer1.Panel2.Controls.Remove(x);
+						createNewBalls(x);
 					}
 				}
 			}
+		}
+
+		private void createNewBalls(Control x)
+        {
+			for(int i = 0; i < 2; ++i)
+            {
+				var newBall = new PictureBox();
+				newBall.Height = 26;
+				newBall.Width = 26;
+				newBall.BackColor = SystemColors.ControlDarkDark;
+				newBall.Left = x.Left + x.Width / 2 - newBall.Width / 2;
+				newBall.Top = x.Top - newBall.Height;
+				newBall.BackgroundImage = Properties.Resources.circle_cropped;
+				newBall.BackgroundImageLayout = ImageLayout.Stretch;
+				ballList.Add(newBall);
+				this.splitContainer1.Panel2.Controls.Add(newBall);
+
+				//Kod stvaranja novih loptica ranumao random kuteve pod kojim krecu.
+				//Ovo bi se moglo jos doradit da tocno biramo kojim se kutom odbijaju, tj. nastaju.
+				//double kut = 0.3 + rnd.NextDouble() * (2.8 - 0.3);
+				//double kut = -0.5 * Math.PI + Math.Pow(-1, i) * i * 0.1 * Math.PI;
+				//ballXList.Add( Math.Cos(kut) * ball_speed);
+				//ballYList.Add( -Math.Sin(kut) * ball_speed);
+				ballXList.Add(Math.Cos(0.5 * Math.PI + 0.05 * i * Math.PI) * ball_speed);
+				ballYList.Add(-Math.Sin(0.5 * Math.PI + 0.05 * i * Math.PI) * ball_speed);
+
+			}
+
 		}
 
 		//Funkcija uzima ciglu x i unistava cigle koje je okruzuju
