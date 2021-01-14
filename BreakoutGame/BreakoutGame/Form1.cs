@@ -227,17 +227,9 @@ namespace BreakoutGame
 			//pomakni lopticu
 			ball.Left += (int)ballX;
 			ball.Top += (int)ballY;
-			
+
 			//Lopta udara u rub prozora
-			//Ako je lopta išla prema lijevo i udarila u lijevi rub, odbija se(isto za gore i desno),
-			if ( (ball.Left < 0 && ballX < 0) || (ball.Right > splitContainer1.Panel2.Width && ballX > 0) )
-			{
-				ballX = -ballX;
-			}
-			if(ball.Top < 0 && ballY < 0)
-			{
-				ballY = -ballY;
-			}
+			provjeriUdaranjeOdRub();
 
 			//Pomicemo padajuce efekte. Dodati slucaj kada udari u igracevu plocu. 
 			//Loptica samo prolazi kroz efekte.
@@ -291,70 +283,10 @@ namespace BreakoutGame
 			}
 
 			//Lopta udara u igraca
-			if (ball.Bounds.IntersectsWith(player.Bounds))
-			{
-				//pozicija gdje loptica udara o plocu
-				double pos = ball.Width / 2 + ball.Left;
-	
-				double sredina_ploce = player.Left + player.Width / 2;
-				double omjer = 2 * (pos - sredina_ploce) / player.Width;
+			provjeriUdaranjeOdIgraca();
 
-				//korigiranje rubnih slučajeva
-				omjer = (omjer < -1) ? -1 : omjer;
-				omjer = (omjer > 1) ? 1 : omjer;
-				//mapiranje intervala [-1,1]->[PI/4,-PI/4]
-				//koliko će mjesto sudaranja lopte i ploče utjecati na
-				//kut odbijanja lopte
-				double kut = omjer * (- Math.PI / 4);
-				
-				//kut_2 je "klasični kut odbijanja lopte od neke podloge"
-				double kut_2 = 0;
-				if (ballX < 0 && ballY > 0)
-					kut_2 = Math.PI - Math.Atan(ballY / -ballX);
-				else if (ballX > 0 && ballY > 0)
-					kut_2 = Math.Atan(ballY / ballX);
-				else if (ballX == 0)
-					kut_2 = Math.PI / 2;
-				
-				//konačni kut odbijanja lopte od ploču je zbroj "klasičnog kuta"
-				//i utjecaja mjesta gdje se lopta udarila s pločom
-				kut = kut + kut_2;
-
-				//nedaj kut manji od PI/7 ili veći od 6PI/7
-				kut = Math.Abs(kut) < Math.PI / 7 ? Math.PI / 7 : kut;
-				kut = Math.Abs(kut) > 6 * Math.PI / 7 ? 6 * Math.PI / 7 : kut;
-
-				ballY = -Math.Sin(kut) * ball_speed;
-				ballX = Math.Cos(kut) * ball_speed;
-
-			}
-			
 			// Provjeri dodiruje li lopta neku ciglu
-			foreach (Control x in this.splitContainer1.Panel2.Controls)
-			{
-                //Gledamo presjek lopte s ciglama.
-                if (ball.Bounds.IntersectsWith(x.Bounds) && x is PictureBox)
-				{
-					//funkcija koja unistava ciglu x
-					destroyBlock(x);
-					//preusmjeri lopticu tj. promijeni ballX ili ballY
-					// jos uvijek se ne odbija savrseno ali bar je puno bolje nego prije
-					if (x.Tag is Block)
-                    {
-						//provjeravanje s koje strane lopta dolazi
-						//trazimo centar lopte te usporedujemo
-						int ball_center_X = ball.Left + (int)(ball.Width / 2);
-						int ball_center_Y = ball.Top + (int)(ball.Height / 2);
-
-						if (ball_center_Y > x.Top + x.Height || ball_center_Y < x.Top)
-							//dolazi s gornje ili donje strane
-							ballY = -ballY;
-						else
-							ballX = -ballX;
-					}
-						
-				}
-			}
+			provjeriUdarenjeOdCiglu();
 
 			if(ball.Top > player.Top)
 			{
@@ -404,6 +336,87 @@ namespace BreakoutGame
 				}
 				draw_rows(1);
 				time_to_shift = 0;
+			}
+		}
+
+		private void provjeriUdarenjeOdCiglu()
+        {
+			foreach (Control x in this.splitContainer1.Panel2.Controls)
+			{
+				//Gledamo presjek lopte s ciglama.
+				if (ball.Bounds.IntersectsWith(x.Bounds) && x is PictureBox)
+				{
+					//funkcija koja unistava ciglu x
+					destroyBlock(x);
+					//preusmjeri lopticu tj. promijeni ballX ili ballY
+					// jos uvijek se ne odbija savrseno ali bar je puno bolje nego prije
+					if (x.Tag is Block)
+					{
+						//provjeravanje s koje strane lopta dolazi
+						//trazimo centar lopte te usporedujemo
+						int ball_center_X = ball.Left + (int)(ball.Width / 2);
+						int ball_center_Y = ball.Top + (int)(ball.Height / 2);
+
+						if (ball_center_Y > x.Top + x.Height || ball_center_Y < x.Top)
+							//dolazi s gornje ili donje strane
+							ballY = -ballY;
+						else
+							ballX = -ballX;
+					}
+
+				}
+			}
+		}
+
+		private void provjeriUdaranjeOdRub()
+        {
+			//Ako je lopta išla prema lijevo i udarila u lijevi rub, odbija se(isto za gore i desno),
+			if ((ball.Left < 0 && ballX < 0) || (ball.Right > splitContainer1.Panel2.Width && ballX > 0))
+			{
+				ballX = -ballX;
+			}
+			if (ball.Top < 0 && ballY < 0)
+			{
+				ballY = -ballY;
+			}
+		}
+
+		private void provjeriUdaranjeOdIgraca()
+        {
+			if (ball.Bounds.IntersectsWith(player.Bounds))
+			{
+				//pozicija gdje loptica udara o plocu
+				double pos = ball.Width / 2 + ball.Left;
+
+				double sredina_ploce = player.Left + player.Width / 2;
+				double omjer = 2 * (pos - sredina_ploce) / player.Width;
+
+				//korigiranje rubnih slučajeva
+				omjer = (omjer < -1) ? -1 : omjer;
+				omjer = (omjer > 1) ? 1 : omjer;
+				//mapiranje intervala [-1,1]->[PI,0]
+				//koliko će mjesto sudaranja lopte i ploče utjecati na
+				//kut odbijanja lopte
+				double kut = Math.PI / 2 + omjer * (-Math.PI / 2);
+
+				//kut_2 je "klasični kut odbijanja lopte od neke podloge
+				/*
+				double kut_2 = 0;
+				if (ballX < 0 && ballY > 0)
+					kut_2 = Math.PI - Math.Atan(ballY / -ballX);
+				else if (ballX > 0 && ballY > 0)
+					kut_2 = Math.Atan(ballY / ballX);
+				else if (ballX == 0)
+					kut_2 = Math.PI / 2;
+				*/
+
+				//nedaj kut manji od PI/7 ili veći od 6PI/7
+				kut = Math.Abs(kut) < Math.PI / 7 ? Math.PI / 7 : kut;
+				kut = Math.Abs(kut) > 6 * Math.PI / 7 ? 6 * Math.PI / 7 : kut;
+
+				ballY = -Math.Sin(kut) * ball_speed;
+				ballX = Math.Cos(kut) * ball_speed;
+
 			}
 		}
 
