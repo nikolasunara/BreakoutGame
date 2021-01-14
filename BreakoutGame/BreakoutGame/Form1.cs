@@ -34,7 +34,7 @@ namespace BreakoutGame
 		List<PictureBox> blockList = new List<PictureBox>();
 
 		//Lista posebnih efekata. Ideja je naslijediti PictureBox u klasama 
-		//Block i Effect. Za sad samo postavljamo te klasekao Tag. Ako se pokaze kao
+		//Block i Effect. Za sad samo postavljamo te klase kao Tag. Ako se pokaze kao
 		//nepotrebno, kasnije cu maknuti/doraditi.
 		//List<Effect> effectsList = new List<Effect>();
 		List<PictureBox> effectList = new List<PictureBox>();
@@ -145,7 +145,7 @@ namespace BreakoutGame
 						block.Tag = new Block { blockColor = "purple" };
 
 					}
-					else if (odluka_boje <= 0.95)
+					else if (odluka_boje <= 0.9) //0.95
                     {
 						block.BackgroundImage = Properties.Resources.destroy;
 						block.Tag = new Effect { Mobile = false, Description = "destroy" };
@@ -348,7 +348,8 @@ namespace BreakoutGame
 				{
 					//preusmjeri lopticu tj. promijeni ballX ili ballY
 					// jos uvijek se ne odbija savrseno ali bar je puno bolje nego prije
-					if (x.Tag is Block)
+					//Loptica se obija i od statickih efekata jednako kao i od cigli.
+					if (x.Tag is Block || (x.Tag is Effect && !((Effect)x.Tag).Mobile ))
 					{
 						//provjeravanje s koje strane lopta dolazi
 						//trazimo centar lopte te usporedujemo
@@ -392,7 +393,7 @@ namespace BreakoutGame
 							ballX = Math.Abs(ballX);
 						}
 					}
-					//funkcija koja unistava ciglu x
+					//funkcija koja unistava ciglu ili staticki efekt x
 					destroyBlock(x);
 				}
 			}
@@ -500,7 +501,8 @@ namespace BreakoutGame
 			int minutes = counter / 60;
 			label2.Text = minutes.ToString("D2") + ":" + seconds.ToString("D2");
 
-			fast_slow_time++;
+			//fast_slow_time++;
+			time_to_shift++;
 
 			// Ako je time_to_shift > 0 znaci da je pokupljen efekt za brzu ili sporu loptu
 			if (fast_slow_time != 0)
