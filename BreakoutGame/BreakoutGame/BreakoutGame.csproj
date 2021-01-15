@@ -160,5 +160,8 @@
   <ItemGroup>
     <None Include="Resources\broken.wav" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\highScore.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

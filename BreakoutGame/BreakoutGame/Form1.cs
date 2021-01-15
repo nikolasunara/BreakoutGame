@@ -17,6 +17,7 @@ namespace BreakoutGame
 
 		int counter;            //broji vrijeme igre
 		int time_to_shift;      //broji vrijeme do pomaka kocki prema dolje	
+		int mMinutes;			//sluzi za pracenje minuta provedenih u igri kako bi mogli postrepeno ubrzavati lopticu
 
 		double ball_speed;      //trenutna brzina loptice
 		double standard_ball_speed;  //uvijek standardna brzina
@@ -67,6 +68,7 @@ namespace BreakoutGame
 			isGameOver = false;
 			score = 0;
 			counter = 0;
+			mMinutes = 0;
 			lowest = 0;
 			time_to_shift = 0;
 			fast_slow_time = 0;
@@ -159,13 +161,13 @@ namespace BreakoutGame
 						block.BackgroundImage = Properties.Resources.redBrick2;
 						block.Tag = new Block { blockColor = "red" };
 					}
-					else if(odluka_boje <= 0.3) //0.75
+					else if(odluka_boje <= 0.5) //0.75
                     {
 						block.BackgroundImage = Properties.Resources.darkGreenBrick;
 						block.Tag = new Block { blockColor = "darkGreen" };
 
 					}
-					else if(odluka_boje <= 0.75) // 0.85
+					else if(odluka_boje <= 0.7) // 0.85
                     {
 						block.BackgroundImage = Properties.Resources.purpleBrick;
 						block.Tag = new Block { blockColor = "purple" };
@@ -587,6 +589,23 @@ namespace BreakoutGame
 
 			//fast_slow_time++;
 			time_to_shift++;
+
+			//Dodajemo ubrzanje loptice nakon sto porde odredeni period vremena.
+			if(mMinutes < minutes)
+            {
+				mMinutes = minutes;
+				//Dodano ekstremno pojacanje cisto radi testiranja. kasnije mozda staviti svakih par minuta
+				//a ne bas svaku.
+				int povecanje = 20;
+				double c = (standard_ball_speed + povecanje) / standard_ball_speed;
+				//Posto je ballX^2 + ballY^2 = speed^2, a brzinu smo pomnozili s c, moramo i ballX i ballY komponente.
+				standard_ball_speed += povecanje;
+				for(int i = 0; i < ballList.Count; ++i)
+                {
+					ballXList[i] *= c;
+					ballYList[i] *= c;
+                }
+            }	
 
 			// Ako je time_to_shift > 0 znaci da je pokupljen efekt za brzu ili sporu loptu
 			if (fast_slow_time != 0)
