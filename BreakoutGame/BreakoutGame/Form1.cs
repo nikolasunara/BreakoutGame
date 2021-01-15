@@ -17,7 +17,7 @@ namespace BreakoutGame
 
 		int counter;            //broji vrijeme igre
 		int time_to_shift;      //broji vrijeme do pomaka kocki prema dolje	
-		int mMinutes;			//sluzi za pracenje minuta provedenih u igri kako bi mogli postrepeno ubrzavati lopticu
+		int mSeconds;			//sluzi za pracenje minuta provedenih u igri kako bi mogli postrepeno ubrzavati lopticu
 
 		double ball_speed;      //trenutna brzina loptice
 		double standard_ball_speed;  //uvijek standardna brzina
@@ -68,11 +68,11 @@ namespace BreakoutGame
 			isGameOver = false;
 			score = 0;
 			counter = 0;
-			mMinutes = 0;
+			mSeconds = 0;
 			lowest = 0;
 			time_to_shift = 0;
 			fast_slow_time = 0;
-			playerSpeed = 12;
+			playerSpeed = 16;
 			scoreText.Text = "Score: " + score;
 			textBox1.Text = "CLICK where you want to send the ball";
 			label2.Text = "00:00";
@@ -315,32 +315,23 @@ namespace BreakoutGame
 						//treba namistiti ballX i ballY tako da daju ball_speed^2
 						//ali tu treba paziti da kut ostane isti
 						fast_slow_time = 1;
-						ball_speed = (int)(1.3 * standard_ball_speed);
+						ball_speed = (int)(1.25 * standard_ball_speed);
 						this.splitContainer1.Panel2.Controls.Remove(ef);
 						effectList.Remove(ef);
 
 						//promijeni ballX i ballY
-						for (int i = 0; i < ballXList.Count(); i++)
-                        {
-							double kut = Math.Atan2(ballYList[i], ballXList[i]);
-							ballXList[i] = ball_speed * Math.Cos(kut);
-							ballYList[i] = ball_speed * Math.Sin(kut);
-						}
+						adjustBallSpeed();
+		
 					}
 					else if (effectTag.Description == "slow")
 					{
 						fast_slow_time = 1;
-						ball_speed = (int)(0.8 * standard_ball_speed);
+						ball_speed = (int)(0.75 * standard_ball_speed);
 						this.splitContainer1.Panel2.Controls.Remove(ef);
 						effectList.Remove(ef);
 
 						//promijeni ballX i ballY
-						for (int i = 0; i < ballXList.Count(); i++)
-						{
-							double kut = Math.Atan2(ballYList[i], ballXList[i]);
-							ballXList[i] = ball_speed * Math.Cos(kut);
-							ballYList[i] = ball_speed * Math.Sin(kut);
-						}
+						adjustBallSpeed();
 					}
 				}
 			}
@@ -579,7 +570,7 @@ namespace BreakoutGame
 				placeBlocks();
 			}
 		}
-		//broji vrijeme u sekundama
+		//broji vrijeme u sekundama, pocinje kad se ispali loptica
         private void timer1_Tick(object sender, EventArgs e)
         {
 			counter++;
@@ -590,20 +581,17 @@ namespace BreakoutGame
 			//fast_slow_time++;
 			time_to_shift++;
 
+			mSeconds++;
 			//Dodajemo ubrzanje loptice nakon sto porde odredeni period vremena.
-			if(mMinutes < minutes)
+			//Ubrzanje se dogada svakih 45 sekundi
+			if(mSeconds > 45)
             {
-				mMinutes = minutes;
-				//Dodano ekstremno pojacanje cisto radi testiranja. kasnije mozda staviti svakih par minuta
-				//a ne bas svaku.
-				int povecanje = 20;
-				double c = (standard_ball_speed + povecanje) / standard_ball_speed;
-				//Posto je ballX^2 + ballY^2 = speed^2, a brzinu smo pomnozili s c, moramo i ballX i ballY komponente.
-				standard_ball_speed += povecanje;
-				for(int i = 0; i < ballList.Count; ++i)
+				mSeconds = 0;
+				standard_ball_speed += 1;
+				if (ball_speed == standard_ball_speed - 1)
                 {
-					ballXList[i] *= c;
-					ballYList[i] *= c;
+					ball_speed = standard_ball_speed;
+					adjustBallSpeed();
                 }
             }	
 
@@ -614,6 +602,9 @@ namespace BreakoutGame
 			{   //ako je proslo 10 sekundi ugasi ga
 				fast_slow_time = 0;
 				ball_speed = standard_ball_speed;
+				//Ako je prethodno doslo do standardnog povecanja brzine,
+				// sad ce se namjestiti
+				adjustBallSpeed();
 			}
 		}
 
@@ -803,7 +794,18 @@ namespace BreakoutGame
 			}
 		}
 
-        private void splitContainer1_Panel2_MouseDown(object sender, MouseEventArgs e)
+        // Funkcija namjesta ballX i ballY za sve lopte, koristi se kad se promjeni ball_speed
+        void adjustBallSpeed()
+        {
+			for (int i = 0; i < ballXList.Count(); i++)
+			{
+				double kut = Math.Atan2(ballYList[i], ballXList[i]);
+				ballXList[i] = ball_speed * Math.Cos(kut);
+				ballYList[i] = ball_speed * Math.Sin(kut);
+			}	
+		}
+
+	private void splitContainer1_Panel2_MouseDown(object sender, MouseEventArgs e)
         {
 			if (ball_speed == 0)
             {
