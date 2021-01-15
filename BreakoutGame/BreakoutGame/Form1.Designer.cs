@@ -157,6 +157,7 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.keyisdown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.keyisup);
+            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.splitContainer1_Panel2_MouseDown);
             ((System.ComponentModel.ISupportInitialize)(this.player)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();

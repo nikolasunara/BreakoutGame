@@ -91,6 +91,24 @@ namespace BreakoutGame.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream brick_shot {
+            get {
+                return ResourceManager.GetStream("brick_shot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream broken {
+            get {
+                return ResourceManager.GetStream("broken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap brokenDarkGreenBrick {
@@ -171,6 +189,15 @@ namespace BreakoutGame.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream explosion {
+            get {
+                return ResourceManager.GetStream("explosion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap fast {
@@ -197,6 +224,15 @@ namespace BreakoutGame.Properties {
             get {
                 object obj = ResourceManager.GetObject("newBall", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream newball1 {
+            get {
+                return ResourceManager.GetStream("newball1", resourceCulture);
             }
         }
         

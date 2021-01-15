@@ -46,6 +46,14 @@ namespace BreakoutGame
 		Random rnd = new Random();
 
 
+		//zvukovi
+		//SoundPlayer moze pustati samo jedan zvuk istovremeno i to radi
+		// u zasebnoj dretvi tako da se javlja bug kad se razbije vise cigli odjednom
+		System.Media.SoundPlayer explosionSound = new System.Media.SoundPlayer(Properties.Resources.explosion);
+		//System.Media.SoundPlayer brickSound = new System.Media.SoundPlayer(Properties.Resources.brick_shot);
+		//System.Media.SoundPlayer newballsSound = new System.Media.SoundPlayer(Properties.Resources.newball1);
+		//System.Media.SoundPlayer brokenSound = new System.Media.SoundPlayer(Properties.Resources.broken);
+
 		public Form1()
 		{
 			InitializeComponent();
@@ -64,7 +72,7 @@ namespace BreakoutGame
 			fast_slow_time = 0;
 			playerSpeed = 12;
 			scoreText.Text = "Score: " + score;
-			textBox1.Text = "Press SPACE to start the game";
+			textBox1.Text = "CLICK where you want to send the ball";
 			label2.Text = "00:00";
 
 
@@ -251,7 +259,7 @@ namespace BreakoutGame
 				if (ball_speed == 0.0)
                 {
 					for (int i = 0; i < ballList.Count; ++i)
-						ballList[i].Left -= playerSpeed;
+						ballList[i].Left += playerSpeed;
 				}
 					
 			}
@@ -305,16 +313,32 @@ namespace BreakoutGame
 						//treba namistiti ballX i ballY tako da daju ball_speed^2
 						//ali tu treba paziti da kut ostane isti
 						fast_slow_time = 1;
-						ball_speed = (int)(1.4 * standard_ball_speed);
+						ball_speed = (int)(1.3 * standard_ball_speed);
 						this.splitContainer1.Panel2.Controls.Remove(ef);
 						effectList.Remove(ef);
+
+						//promijeni ballX i ballY
+						for (int i = 0; i < ballXList.Count(); i++)
+                        {
+							double kut = Math.Atan2(ballYList[i], ballXList[i]);
+							ballXList[i] = ball_speed * Math.Cos(kut);
+							ballYList[i] = ball_speed * Math.Sin(kut);
+						}
 					}
 					else if (effectTag.Description == "slow")
 					{
 						fast_slow_time = 1;
-						ball_speed = (int)(0.7 * standard_ball_speed);
+						ball_speed = (int)(0.8 * standard_ball_speed);
 						this.splitContainer1.Panel2.Controls.Remove(ef);
 						effectList.Remove(ef);
+
+						//promijeni ballX i ballY
+						for (int i = 0; i < ballXList.Count(); i++)
+						{
+							double kut = Math.Atan2(ballYList[i], ballXList[i]);
+							ballXList[i] = ball_speed * Math.Cos(kut);
+							ballYList[i] = ball_speed * Math.Sin(kut);
+						}
 					}
 				}
 			}
@@ -535,21 +559,6 @@ namespace BreakoutGame
 			{
 				goRight = true;
 			}
-			else if (e.KeyCode == Keys.Space && ball_speed == 0)    //pokrece igru
-            {
-				ball_speed = 12;
-				standard_ball_speed = ball_speed;
-				//odredi kut pod kojim ce loptica biti ispaljena
-				double kut = 0.3 + rnd.NextDouble() * (2.8 - 0.3);
-				textBox1.Text = "";
-
-				//ball_speed moze biti 0 samo kad imamo jednu lopticu, tj prije pocetka igre
-				ballXList[0] = Math.Cos(kut) * ball_speed;
-				ballYList[0] = -Math.Sin(kut) * ball_speed;
-
-				//zapocni timer u za igru u sekundama
-				timer1.Start();
-			}
 		}
 
 		private void keyisup(object sender, KeyEventArgs e)
@@ -582,8 +591,8 @@ namespace BreakoutGame
 			// Ako je time_to_shift > 0 znaci da je pokupljen efekt za brzu ili sporu loptu
 			if (fast_slow_time != 0)
 				fast_slow_time++;
-			if (fast_slow_time > 15)
-			{   //ako je proslo 15 sekundi ugasi ga
+			if (fast_slow_time > 10)
+			{   //ako je proslo 10 sekundi ugasi ga
 				fast_slow_time = 0;
 				ball_speed = standard_ball_speed;
 			}
@@ -600,6 +609,7 @@ namespace BreakoutGame
 					//Cigla je napukla.
 					x.BackgroundImage = Properties.Resources.brokenDarkGreenBrick;
 					x.Tag = new Block { blockColor = "brokenDarkGreen" };
+					//brokenSound.Play();
 				}
 				else
 				{
@@ -612,10 +622,18 @@ namespace BreakoutGame
 					else
 						score += 10;
 
+					//brickSound.Play(); 
 
 					//Mozda i maknuti iz liste cigli, ne samo iz kontrola?
 					this.splitContainer1.Panel2.Controls.Remove(x);
-
+					//Brisanje iz liste cigli i azuiranje lowest
+					lowest = 0;
+					foreach (PictureBox p in blockList.ToList())
+						if (p.Top == x.Top && p.Left == x.Left)
+							blockList.Remove(p);
+                        else if (p.Top > lowest) 
+							lowest = p.Top;
+                        
 
 					//Ako smo pogidili ciglu koja stvara padajuci efekt, ovdje ga stvaramo.
 					//Od njega se loptica ne odbija vec samo prolazi preko njega. Cilj ga je 
@@ -682,13 +700,39 @@ namespace BreakoutGame
 					//Dodati jos brisanje iz liste efekata, kao sto treba i za cigle.
 					if (effectTag.Description == "destroy")
 					{
+						explosionSound.Play();
 						this.splitContainer1.Panel2.Controls.Remove(x);
+
+						//brisanje iz liste efekata
+						lowest = 0;
+						foreach (PictureBox p in effectList.ToList())
+							if (p.Top == x.Top && p.Left == x.Left)
+								effectList.Remove(p);
+							else if (p.Top > lowest)
+							{
+								Effect ef = (Effect)p.Tag;
+								if (!ef.Mobile)
+									lowest = p.Top;
+							}
+
 						destroySurroundingBlocks(x); //unistava okolne cigle
 					}
 					else if (effectTag.Description == "newBall")
 					{
 						//dodati stvaranje novih loptice
+						//newballsSound.Play();
 						this.splitContainer1.Panel2.Controls.Remove(x);
+						lowest = 0;
+						foreach (PictureBox p in effectList.ToList())
+							if (p.Top == x.Top && p.Left == x.Left)
+								effectList.Remove(p);
+							else if (p.Top > lowest)
+                            {
+								Effect ef = (Effect)p.Tag;
+								if (!ef.Mobile)
+									lowest = p.Top;
+							} 
+								
 						createNewBalls(x);
 					}
 				}
@@ -740,5 +784,38 @@ namespace BreakoutGame
 			}
 		}
 
-	}
+        private void splitContainer1_Panel2_MouseDown(object sender, MouseEventArgs e)
+        {
+			if (ball_speed == 0)
+            {
+				//pokretanje igre
+				//prvo pronadi gdje treba usmjeriti lopticu
+				//ako je klik bio prenisko, zanemari
+				if (e.Y > player.Top - 5)
+					return;
+				
+				int sredina_lopte_X = ballList[0].Left + (int)ballList[0].Width / 2;
+				int sredina_lopte_Y = ballList[0].Top;
+				int a = Math.Abs((e.X - splitContainer1.Panel1.Width) - sredina_lopte_X);
+				int b = Math.Abs(e.Y - sredina_lopte_Y);
+			
+				double kut = Math.Atan2(b,a);
+				
+				//ako je klik bio s lijeve strane translatiraj ga
+				if ((e.X - splitContainer1.Panel1.Width) < sredina_lopte_X)
+					kut = Math.PI - kut;
+
+				ball_speed = 11;
+				standard_ball_speed = ball_speed;
+				textBox1.Text = "";
+
+				//ball_speed moze biti 0 samo kad imamo jednu lopticu, tj prije pocetka igre
+				ballXList[0] = Math.Cos(kut) * ball_speed;
+				ballYList[0] = -Math.Sin(kut) * ball_speed;
+
+				//zapocni timer u za igru u sekundama
+				timer1.Start();
+			}
+        }
+    }
 }
