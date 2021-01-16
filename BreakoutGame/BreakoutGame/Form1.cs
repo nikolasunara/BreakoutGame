@@ -470,10 +470,9 @@ namespace BreakoutGame
 		//tu bih htio odrediti lpotica udara u ciglu, da dodam zvuk,
 		//no ne znam razlikovati cigle od ostalih statickih efekata
 		private void provjeriUdarenjeOdCiglu()
-        {
-
-			for(int tmpCounter = 0; tmpCounter < ballList.Count; ++tmpCounter)
-            {
+		{
+			for (int tmpCounter = 0; tmpCounter < ballList.Count; ++tmpCounter)
+			{
 				PictureBox mBall = ballList[tmpCounter];
 
 				foreach (Control x in this.splitContainer1.Panel2.Controls)
@@ -481,58 +480,118 @@ namespace BreakoutGame
 					//Gledamo presjek lopte s ciglama.
 					if (mBall.Bounds.IntersectsWith(x.Bounds) && x is PictureBox)
 					{
-						//preusmjeri lopticu tj. promijeni ballX ili ballY
-						// jos uvijek se ne odbija savrseno ali bar je puno bolje nego prije
-						//Loptica se obija i od statickih efekata jednako kao i od cigli.
 						if (x.Tag is Block || (x.Tag is Effect && !((Effect)x.Tag).Mobile))
 						{
-							//provjeravanje s koje strane lopta dolazi
-							//trazimo centar lopte te usporedujemo
-							int ball_center_X = mBall.Left + (int)(mBall.Width / 2);
-							int ball_center_Y = mBall.Top + (int)(mBall.Height / 2);
+							bool dvijeOdjednom = false;
+							PictureBox y = new PictureBox();
+							// provjerimo je li imamo presjek s dvije cigle odjednom
+							foreach (Control z in this.splitContainer1.Panel2.Controls)
+							{
+								if (mBall.Bounds.IntersectsWith(z.Bounds) && z is PictureBox)
+								{
+									if (z.Tag is Block || (z.Tag is Effect && !((Effect)z.Tag).Mobile))
+									{
+										// z == x
+										if (z.Left == x.Left && z.Top == x.Top)
+											continue;
+										else
+										{
+											dvijeOdjednom = true;
+											y = (PictureBox)z;
+											break;
+										}
+									}
+								}
 
-							if ((ball_center_X >= x.Left && ball_center_X <= x.Right && mBall.Top <= x.Bottom) ||
-									(ball_center_X >= x.Left && ball_center_X <= x.Right && mBall.Bottom >= x.Top))
+							}
+							//Loptica se obija i od statickih efekata jednako kao i od cigli.
+							// 1. slučaj imamo presjek sa samo 1 ciglom
+							if (!dvijeOdjednom)
+							{
+								//provjeravanje s koje strane lopta dolazi
+								//trazimo centar lopte te usporedujemo
+								int ball_center_X = mBall.Left + (int)(mBall.Width / 2);
+								int ball_center_Y = mBall.Top + (int)(mBall.Height / 2);
+
+								if ((ball_center_X >= x.Left && ball_center_X <= x.Right && mBall.Top <= x.Bottom && ballYList[tmpCounter] < 0 ) ||
+										(ball_center_X >= x.Left && ball_center_X <= x.Right && mBall.Bottom >= x.Top && ballXList[tmpCounter] > 0))
+									//dolazi s gornje ili donje strane
+									ballYList[tmpCounter] = -ballYList[tmpCounter];
+								else if ((ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && mBall.Right >= x.Left && ballXList[tmpCounter] > 0) ||
+										(ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && mBall.Left <= x.Right && ballXList[tmpCounter] < 0))
+									//dolazi s lijeva ili desna
+									ballXList[tmpCounter] = -ballXList[tmpCounter];
+								else if ((ball_center_X < x.Left && mBall.Top <= x.Bottom) ||
+											(ball_center_Y > x.Bottom && mBall.Right >= x.Left))
+								//udara u lijevi donji rub
+								{
+									ballYList[tmpCounter] = Math.Abs(ballYList[tmpCounter]);
+									ballXList[tmpCounter] = -Math.Abs(ballXList[tmpCounter]);
+								}
+								else if ((ball_center_X > x.Right && mBall.Top <= x.Bottom) ||
+											(ball_center_Y > x.Bottom && mBall.Left <= x.Right))
+								//udara u desni donji rub
+								{
+									ballYList[tmpCounter] = Math.Abs(ballYList[tmpCounter]);
+									ballXList[tmpCounter] = -Math.Abs(ballXList[tmpCounter]); //mozda -
+								}
+								else if ((ball_center_X < x.Left && mBall.Bottom >= x.Top) ||
+											(ball_center_Y < x.Top && mBall.Right >= x.Left))
+								//udara u gornji lijevi rub
+								{
+									ballYList[tmpCounter] = -Math.Abs(ballYList[tmpCounter]);
+									ballXList[tmpCounter] = -Math.Abs(ballXList[tmpCounter]);
+								}
+								else if ((ball_center_X > x.Right && mBall.Bottom >= x.Top) ||
+											(ball_center_Y < x.Top && mBall.Left <= x.Right))
+								//udara u gornji desni rub									
+								{
+									ballYList[tmpCounter] = -Math.Abs(ballYList[tmpCounter]);
+									ballXList[tmpCounter] = Math.Abs(ballXList[tmpCounter]);
+								}
+								//funkcija koja unistava ciglu ili staticki efekt x
+								destroyBlock(x);
+							}
+							// 2. slučaj dodirujemo dvije cigle odjednom
+							else if (dvijeOdjednom)
+							{
+								//trazimo centar lopte te usporedujemo
+								int ball_center_X = mBall.Left + (int)(mBall.Width / 2);
+								int ball_center_Y = mBall.Top + (int)(mBall.Height / 2);
+								int x_center_X = x.Left + (int)(x.Width / 2);
+								int x_center_Y = x.Top + (int)(x.Height / 2);
+								int y_center_X = y.Left + (int)(y.Width / 2);
+								int y_center_Y = y.Top + (int)(y.Height / 2);
+
+								if ((ball_center_X >= x.Left && ball_center_X <= y.Right) ||
+											(ball_center_X >= y.Left && ball_center_X <= x.Right))
 								//dolazi s gornje ili donje strane
-								ballYList[tmpCounter] = -ballYList[tmpCounter];
-							else if ((ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && mBall.Right >= x.Left) ||
-									(ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && mBall.Left <= x.Right))
+								{
+									ballYList[tmpCounter] = -ballYList[tmpCounter];
+
+									//uništavamo bližu ciglu
+									if (Math.Abs(ball_center_X - x_center_X) > Math.Abs(ball_center_X - y_center_X))
+										destroyBlock(y);
+									else
+										destroyBlock(x);
+								}
+								else
 								//dolazi s lijeva ili desna
-								ballXList[tmpCounter] = -ballXList[tmpCounter];
-							else if ((ball_center_X < x.Left && mBall.Top <= x.Bottom) ||
-										(ball_center_Y > x.Bottom && mBall.Right >= x.Left))
-							//udara u lijevi donji rub
-							{
-								ballYList[tmpCounter] = Math.Abs(ballYList[tmpCounter]);
-								ballXList[tmpCounter] = -Math.Abs(ballXList[tmpCounter]);
-							}
-							else if ((ball_center_X > x.Right && mBall.Top <= x.Bottom) ||
-										(ball_center_Y > x.Bottom && mBall.Left <= x.Right))
-							//udara u desni donji rub
-							{
-								ballYList[tmpCounter] = Math.Abs(ballYList[tmpCounter]);
-								ballXList[tmpCounter] = Math.Abs(ballXList[tmpCounter]);
-							}
-							else if ((ball_center_X < x.Left && mBall.Bottom >= x.Top) ||
-										(ball_center_Y < x.Top && mBall.Right >= x.Left))
-							//udara u gornji lijevi rub
-							{
-								ballYList[tmpCounter] = -Math.Abs(ballYList[tmpCounter]);
-								ballXList[tmpCounter] = -Math.Abs(ballXList[tmpCounter]);
-							}
-							else if ((ball_center_X > x.Right && mBall.Bottom >= x.Top) ||
-										(ball_center_Y < x.Top && mBall.Left <= x.Right))
-							//udara i gornji desni rub
-							{
-								ballYList[tmpCounter] = -Math.Abs(ballYList[tmpCounter]);
-								ballXList[tmpCounter] = Math.Abs(ballXList[tmpCounter]);
+								{
+									ballXList[tmpCounter] = -ballXList[tmpCounter];
+
+									//uništavamo bližu ciglu
+									if (Math.Abs(ball_center_X - x_center_Y) > Math.Abs(ball_center_X - y_center_Y))
+										destroyBlock(y);
+									else
+										destroyBlock(x);
+								}
 							}
 						}
-						//funkcija koja unistava ciglu ili staticki efekt x
-						destroyBlock(x);
+
 					}
 				}
-            }
+			}
 		}
 
 		private void provjeriUdaranjeOdRub()
