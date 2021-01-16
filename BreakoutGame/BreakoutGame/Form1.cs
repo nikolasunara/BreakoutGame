@@ -50,10 +50,55 @@ namespace BreakoutGame
 		//zvukovi
 		//SoundPlayer moze pustati samo jedan zvuk istovremeno i to radi
 		// u zasebnoj dretvi tako da se javlja bug kad se razbije vise cigli odjednom
-		System.Media.SoundPlayer explosionSound = new System.Media.SoundPlayer(Properties.Resources.explosion);
-		//System.Media.SoundPlayer brickSound = new System.Media.SoundPlayer(Properties.Resources.brick_shot);
-		//System.Media.SoundPlayer newballsSound = new System.Media.SoundPlayer(Properties.Resources.newball1);
-		//System.Media.SoundPlayer brokenSound = new System.Media.SoundPlayer(Properties.Resources.broken);
+		System.Media.SoundPlayer explosionSound = new System.Media.SoundPlayer(Properties.Resources.sound_explosion);
+		System.Media.SoundPlayer brickSound = new System.Media.SoundPlayer(Properties.Resources.sound_brick_collision2);
+		System.Media.SoundPlayer gameoverSound = new System.Media.SoundPlayer(Properties.Resources.sound_gameover);
+		System.Media.SoundPlayer pointsSound = new System.Media.SoundPlayer(Properties.Resources.sound_points_earned);
+		System.Media.SoundPlayer startSound = new System.Media.SoundPlayer(Properties.Resources.sound_start);
+		System.Media.SoundPlayer wallSound = new System.Media.SoundPlayer(Properties.Resources.sound_wall);
+
+		//System.Media.SoundPlayer newballsSound = new System.Media.SoundPlayer(Properties.Resources.);
+		//System.Media.SoundPlayer brokenSound = new System.Media.SoundPlayer(Properties.Resources.broken.);
+
+		//da znamo u kojem trenutku je koji zvuk pusten
+		DateTime startTime = DateTime.Now;
+
+		string last_sound_type;
+		double last_sound_time;
+
+		private void playSound(string s) {
+			DateTime currentTime = DateTime.Now;
+			TimeSpan elapsed_time = currentTime - startTime;
+			double time_sec = elapsed_time.TotalSeconds;
+			if (s != "gameover" && s != "explosion") { 
+				//niti jedan zvuk, osim gameovera i nje same ne smije
+				//prekidati eksploziju
+				if (last_sound_type == "explosion" && time_sec - last_sound_time < 1.4)
+					return;
+				//osiguravamo se da za jednu koliziju nemamo vise od jednog zvuka,
+				//a i smanjujemo buku ovime
+				if (last_sound_type == s && time_sec - last_sound_time < 0.01)
+					return;
+			}
+
+			//ako smo dosli do ovog dijela znaci da ce se pokrenuti novi zvuk
+			last_sound_type = s;
+			last_sound_time = time_sec;
+			if (s == "explosion")
+				explosionSound.Play();
+			else if (s == "brick")
+				brickSound.Play();
+			else if (s == "gameover")
+				gameoverSound.Play();
+			else if (s == "points")
+				pointsSound.Play();
+			else if (s == "start")
+				startSound.Play();
+			else if (s == "wall")
+				wallSound.Play();
+
+		}
+
 
 		public Form1()
 		{
@@ -103,6 +148,9 @@ namespace BreakoutGame
 			ballXList.Add(0);
 			ballYList.Add(0);
 
+			startTime = DateTime.Now;
+			last_sound_type = "";
+			last_sound_time = 0;
 
 			gameTimer.Start();
 		}
@@ -227,11 +275,13 @@ namespace BreakoutGame
 
 		private void gameOver()
 		{
+			playSound("broken");
 			isGameOver = true;
 			gameTimer.Stop();
 			timer1.Stop();
 			scoreText.Text = "Score: " + score;
 			textBox1.Text = "Game over! Press Enter to play again.";
+			playSound("gameover");
 		}
 
 		private void mainGameTimerEvent(object sender, EventArgs e)
@@ -295,6 +345,7 @@ namespace BreakoutGame
 				}
 				else if (ef.Bounds.IntersectsWith(player.Bounds))
 				{
+					playSound("points"); //zapravo se misli na bonuse opcenito
 					// Igrac je pokupio efekt
 					// Imamo 4 slučaja:
 					if (effectTag.Description == "bonus50")
@@ -411,6 +462,9 @@ namespace BreakoutGame
 			}
 		}
 
+
+		//tu bih htio odrediti lpotica udara u ciglu, da dodam zvuk,
+		//no ne znam razlikovati cigle od ostalih statickih efekata
 		private void provjeriUdarenjeOdCiglu()
         {
 
@@ -488,10 +542,12 @@ namespace BreakoutGame
 				if ((mBall.Left < 0 && ballXList[tmpCounter] < 0) || (mBall.Right > splitContainer1.Panel2.Width && ballXList[tmpCounter] > 0))
 				{
 					ballXList[tmpCounter] = -ballXList[tmpCounter];
+					playSound("wall");
 				}
 				if (mBall.Top < 0 && ballYList[tmpCounter] < 0)
 				{
 					ballYList[tmpCounter] = -ballYList[tmpCounter];
+					playSound("wall");
 				}
 			}
 		}
@@ -505,6 +561,9 @@ namespace BreakoutGame
 
 				if (mBall.Bounds.IntersectsWith(player.Bounds))
 				{
+					//isti zvuk kao i kad udara u zid
+					playSound("wall");
+
 					//pozicija gdje loptica udara o plocu
 					double pos = mBall.Width / 2 + mBall.Left;
 
@@ -613,13 +672,13 @@ namespace BreakoutGame
         {
 			if (x.Tag is Block)
 			{
+				playSound("brick");
 				Block blockTag = (Block)x.Tag;
 				if (blockTag.blockColor == "darkGreen")
 				{
 					//Cigla je napukla.
 					x.BackgroundImage = Properties.Resources.brokenDarkGreenBrick;
 					x.Tag = new Block { blockColor = "brokenDarkGreen" };
-					//brokenSound.Play();
 				}
 				else
 				{
@@ -631,8 +690,6 @@ namespace BreakoutGame
 					}
 					else
 						score += 10;
-
-					//brickSound.Play(); 
 
 					//Mozda i maknuti iz liste cigli, ne samo iz kontrola?
 					this.splitContainer1.Panel2.Controls.Remove(x);
@@ -710,7 +767,8 @@ namespace BreakoutGame
 					//Dodati jos brisanje iz liste efekata, kao sto treba i za cigle.
 					if (effectTag.Description == "destroy")
 					{
-						explosionSound.Play();
+						playSound("explosion");
+
 						this.splitContainer1.Panel2.Controls.Remove(x);
 
 						//brisanje iz liste efekata
@@ -835,6 +893,7 @@ namespace BreakoutGame
 				ballYList[0] = -Math.Sin(kut) * ball_speed;
 
 				//zapocni timer u za igru u sekundama
+				playSound("start");
 				timer1.Start();
 			}
         }

@@ -218,7 +218,10 @@ namespace BreakoutGame.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to .
+        ///   Looks up a localized string similar to 4021 - Pero
+        ///4001 - Ana
+        ///1021 - Ivo
+        ///.
         /// </summary>
         internal static string highScore {
             get {
@@ -292,6 +295,69 @@ namespace BreakoutGame.Properties {
             get {
                 object obj = ResourceManager.GetObject("slow", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream sound_brick_collision {
+            get {
+                return ResourceManager.GetStream("sound_brick_collision", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream sound_brick_collision2 {
+            get {
+                return ResourceManager.GetStream("sound_brick_collision2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream sound_explosion {
+            get {
+                return ResourceManager.GetStream("sound_explosion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream sound_gameover {
+            get {
+                return ResourceManager.GetStream("sound_gameover", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream sound_points_earned {
+            get {
+                return ResourceManager.GetStream("sound_points_earned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream sound_start {
+            get {
+                return ResourceManager.GetStream("sound_start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream sound_wall {
+            get {
+                return ResourceManager.GetStream("sound_wall", resourceCulture);
             }
         }
         

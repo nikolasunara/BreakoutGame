@@ -163,5 +163,29 @@
   <ItemGroup>
     <None Include="Resources\highScore.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Sounds\sound_brick.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Sounds\sound_explosion.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Sounds\sound_gameover.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Sounds\sound_points_earned.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Sounds\sound_start.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Sounds\sound_wall.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Sounds\sound_brick_collision.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Sounds\sound_brick_collision2.wav" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
