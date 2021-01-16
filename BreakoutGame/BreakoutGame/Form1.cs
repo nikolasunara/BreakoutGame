@@ -590,7 +590,7 @@ namespace BreakoutGame
 									if (Math.Abs(mBall.Left - x.Right) > Math.Abs(mBall.Right - x.Left))
 										mBall.Left = x.Left - 1 - mBall.Width;
 									else
-										mBall.Left = x.Left + 1;
+										mBall.Left = x.Right + 1;
 
 									//uništavamo bližu ciglu
 									if (Math.Abs(ball_center_X - x_center_Y) > Math.Abs(ball_center_X - y_center_Y))
