@@ -77,8 +77,12 @@ namespace BreakoutGame
 					return;
 				//osiguravamo se da za jednu koliziju nemamo vise od jednog zvuka,
 				//a i smanjujemo buku ovime
-				if (last_sound_type == s && time_sec - last_sound_time < 0.01)
+				if (last_sound_type == s && time_sec - last_sound_time < 0.05)
 					return;
+				if (last_sound_type == "brick" && time_sec - last_sound_time < 0.2)
+					return;
+
+
 			}
 
 			//ako smo dosli do ovog dijela znaci da ce se pokrenuti novi zvuk
