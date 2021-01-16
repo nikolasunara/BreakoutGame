@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Linq;
+using System.IO;
 
 namespace BreakoutGame
 {
@@ -286,6 +287,32 @@ namespace BreakoutGame
 			scoreText.Text = "Score: " + score;
 			textBox1.Text = "Game over! Press Enter to play again.";
 			playSound("gameover");
+
+			//Ako je score među top 3, upiši ga u highScore.txt
+			var stream = new StreamReader(@".\..\..\Resources\highScore.txt");
+			//sluzi da znamo je li postignut novi highscore
+			bool flag = false;
+			for (int i = 0; i < 3; i++)
+			{
+				string red = stream.ReadLine();
+				string[] names = red.Split(',');
+				if (Int32.Parse(names[0]) < score)
+                {
+					string ime = Prompt.ShowDialog("Osvojili ste "+ (i+1).ToString() + ". najbolji rezultat. Molimo upišite svoje ime.", "Čestitamo!");
+					while (ime == "")
+						ime = Prompt.ShowDialog("Molimo upišite ime.","Ne zafrkavajte se");
+					stream.Close();
+					Form highscores = new ScoresForm(score, ime, i);
+					highscores.ShowDialog();
+					flag = true;
+					break;
+				}
+			}
+			if (!flag)
+            {
+				Form highscores = new ScoresForm(score);
+				highscores.ShowDialog();
+			}
 		}
 
 		private void mainGameTimerEvent(object sender, EventArgs e)
@@ -914,7 +941,7 @@ namespace BreakoutGame
 		private void destroySurroundingBlocks(Control x)
 		{
 			
-			var rect = new Rectangle(x.Left - 2, x.Top - 2 ,x.Width + 5, x.Height + 5);
+			var rect = new Rectangle(x.Left - 5, x.Top - 5 ,x.Width + 10, x.Height + 10);
 			foreach (Control c in this.splitContainer1.Panel2.Controls)
 			{
 				if (c is PictureBox && (c.Tag is Block || c.Tag is Effect))
