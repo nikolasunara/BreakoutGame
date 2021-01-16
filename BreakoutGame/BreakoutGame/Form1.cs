@@ -569,6 +569,12 @@ namespace BreakoutGame
 								{
 									ballYList[tmpCounter] = -ballYList[tmpCounter];
 
+									//spriječimo uništavanje druge u sljedećoj iteraciji igrice
+									if (Math.Abs(mBall.Bottom - x.Top) > Math.Abs(mBall.Top - x.Bottom))
+										mBall.Top = x.Bottom + 1;
+									else
+										mBall.Top = x.Top - 1 - mBall.Height;
+
 									//uništavamo bližu ciglu
 									if (Math.Abs(ball_center_X - x_center_X) > Math.Abs(ball_center_X - y_center_X))
 										destroyBlock(y);
@@ -579,6 +585,12 @@ namespace BreakoutGame
 								//dolazi s lijeva ili desna
 								{
 									ballXList[tmpCounter] = -ballXList[tmpCounter];
+
+									//spriječimo uništavanje druge u sljedećoj iteraciji igrice
+									if (Math.Abs(mBall.Left - x.Right) > Math.Abs(mBall.Right - x.Left))
+										mBall.Left = x.Left - 1 - mBall.Width;
+									else
+										mBall.Left = x.Left + 1;
 
 									//uništavamo bližu ciglu
 									if (Math.Abs(ball_center_X - x_center_Y) > Math.Abs(ball_center_X - y_center_Y))
