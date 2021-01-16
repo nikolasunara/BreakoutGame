@@ -521,29 +521,29 @@ namespace BreakoutGame
 										(ball_center_Y <= x.Bottom && ball_center_Y >= x.Top && mBall.Left <= x.Right && ballXList[tmpCounter] < 0))
 									//dolazi s lijeva ili desna
 									ballXList[tmpCounter] = -ballXList[tmpCounter];
-								else if ((ball_center_X < x.Left && mBall.Top <= x.Bottom) ||
-											(ball_center_Y > x.Bottom && mBall.Right >= x.Left))
+								else if ((ball_center_X < x.Left && ball_center_Y > x.Bottom) ||
+											(ball_center_Y > x.Bottom && ball_center_X < x.Left))
 								//udara u lijevi donji rub
 								{
 									ballYList[tmpCounter] = Math.Abs(ballYList[tmpCounter]);
 									ballXList[tmpCounter] = -Math.Abs(ballXList[tmpCounter]);
 								}
-								else if ((ball_center_X > x.Right && mBall.Top <= x.Bottom) ||
-											(ball_center_Y > x.Bottom && mBall.Left <= x.Right))
+								else if ((ball_center_X > x.Right && ball_center_Y > x.Bottom) ||
+											(ball_center_Y > x.Bottom && ball_center_X > x.Right))
 								//udara u desni donji rub
 								{
 									ballYList[tmpCounter] = Math.Abs(ballYList[tmpCounter]);
-									ballXList[tmpCounter] = -Math.Abs(ballXList[tmpCounter]); //mozda -
+									ballXList[tmpCounter] = Math.Abs(ballXList[tmpCounter]); 
 								}
-								else if ((ball_center_X < x.Left && mBall.Bottom >= x.Top) ||
-											(ball_center_Y < x.Top && mBall.Right >= x.Left))
+								else if ((ball_center_X < x.Left && ball_center_Y < x.Top) ||
+											(ball_center_Y < x.Top && ball_center_X < x.Left))
 								//udara u gornji lijevi rub
 								{
 									ballYList[tmpCounter] = -Math.Abs(ballYList[tmpCounter]);
 									ballXList[tmpCounter] = -Math.Abs(ballXList[tmpCounter]);
 								}
-								else if ((ball_center_X > x.Right && mBall.Bottom >= x.Top) ||
-											(ball_center_Y < x.Top && mBall.Left <= x.Right))
+								else if ((ball_center_X > x.Right && ball_center_Y < x.Top) ||
+											(ball_center_Y < x.Top && ball_center_X > x.Right))
 								//udara u gornji desni rub									
 								{
 									ballYList[tmpCounter] = -Math.Abs(ballYList[tmpCounter]);
