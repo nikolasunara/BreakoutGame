@@ -51,7 +51,7 @@ namespace BreakoutGame
                 {
                     if (i/2 == k)
                     {
-                        string red = stream.ReadLine();  //treba samo procitati red da ga se prode
+                        //string red = stream.ReadLine();  //treba samo procitati red da ga se prode
                         labels[i].Text = name;
                         labels[i].ForeColor = Color.DarkGreen;
                         labels[i + 1].ForeColor = Color.DarkGreen;

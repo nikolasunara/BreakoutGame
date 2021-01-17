@@ -127,6 +127,9 @@ namespace BreakoutGame
 			textBox1.Text = "CLICK where you want to send the ball";
 			label2.Text = "00:00";
 
+			goLeft = false;
+			goRight = false;
+
 
 			//namjesti plocu na sredinu
 			player.Left = (int)(splitContainer1.Panel2.Width / 2 - player.Width / 2);
@@ -200,7 +203,7 @@ namespace BreakoutGame
 					 * Korigirat ove brojeve u testnoj fazi.
 					 * 
 					 * Ovi brojevi trenutno promijenjeni radi testiranja.
-					 */
+					*/
 
 					double odluka_boje = rnd.NextDouble();
 					bool is_effect = false;
@@ -965,7 +968,7 @@ namespace BreakoutGame
 			}	
 		}
 
-	private void splitContainer1_Panel2_MouseDown(object sender, MouseEventArgs e)
+		private void splitContainer1_Panel2_MouseDown(object sender, MouseEventArgs e)
         {
 			if (ball_speed == 0)
             {
@@ -999,5 +1002,6 @@ namespace BreakoutGame
 				timer1.Start();
 			}
         }
+
     }
 }
