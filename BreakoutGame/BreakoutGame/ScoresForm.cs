@@ -51,7 +51,7 @@ namespace BreakoutGame
                 {
                     if (i/2 == k)
                     {
-                        //string red = stream.ReadLine();  //treba samo procitati red da ga se prode
+                        //upisi name i score i dodaj ih u liste
                         labels[i].Text = name;
                         labels[i].ForeColor = Color.DarkGreen;
                         labels[i + 1].ForeColor = Color.DarkGreen;
@@ -78,6 +78,7 @@ namespace BreakoutGame
                 writer1.WriteLine("");
                 writer1.Close();
 
+                //zapisi sve iz liste u highScore.txt
                 using (StreamWriter writer = new StreamWriter(@".\..\..\Resources\highScore.txt"))
                 {
                     for (int i = 0; i < 3; i++)

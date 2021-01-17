@@ -9,12 +9,15 @@ namespace BreakoutGame
 {
 	public partial class Form1 : Form
 	{
-		bool goLeft;
+		// Gledaju krecemo li se lijevo ili desno s igracem
+		bool goLeft;	
 		bool goRight;
+
+		//true ako je igra gotova
 		bool isGameOver;
 
-		int score;
-		int playerSpeed;
+		int score;				//pratimo trenutni rezultat
+		int playerSpeed;		//Brzina pomaka ploce
 
 		int counter;            //broji vrijeme igre
 		int time_to_shift;      //broji vrijeme do pomaka kocki prema dolje	
@@ -22,7 +25,7 @@ namespace BreakoutGame
 
 		double ball_speed;      //trenutna brzina loptice
 		double standard_ball_speed;  //uvijek standardna brzina
-		int fast_slow_time;
+		int fast_slow_time;			//mjeri trajanje efekta (efekti trebaju trajat 10 sekundi)
 
 		int lowest;             //prati poziciju najdonje kocke
 
@@ -54,8 +57,6 @@ namespace BreakoutGame
 		System.Media.SoundPlayer startSound = new System.Media.SoundPlayer(Properties.Resources.sound_start);
 		System.Media.SoundPlayer wallSound = new System.Media.SoundPlayer(Properties.Resources.sound_wall);
 
-		//System.Media.SoundPlayer newballsSound = new System.Media.SoundPlayer(Properties.Resources.);
-		//System.Media.SoundPlayer brokenSound = new System.Media.SoundPlayer(Properties.Resources.broken.);
 
 		//da znamo u kojem trenutku je koji zvuk pusten
 		DateTime startTime = DateTime.Now;
@@ -140,9 +141,6 @@ namespace BreakoutGame
 			ballFirst.Height = 26;
 			ballFirst.Width = 26;
 			ballFirst.BackColor = SystemColors.ControlDarkDark;
-			//Ako zelimo smjestiti lopticu u sredinu prozora.
-			//ballFirst.Left = (int)(splitContainer1.Panel2.Width) / 2  - ballFirst.Width / 2;
-			//ballFirst.Top = (int)(splitContainer1.Panel2.Height) / 2  - ballFirst.Height / 2;
 			//Smjestamo lopticu na sredinu igrace ploce.
 			ballFirst.Left = player.Left + player.Width / 2 - ballFirst.Width / 2;
 			ballFirst.Top = player.Top - ballFirst.Height;
@@ -169,8 +167,10 @@ namespace BreakoutGame
 		}
 		private void draw_rows(int n) //crta n redova kocki, u svakom redu uvijek 10 kocki
         {
+			//koordinate
 			int top = 5;
 			int left = 1;
+			
 			int width = (int)(splitContainer1.Panel2.Width - 14) / 10;
 
             for (int i = 0; i < n; i++)
@@ -261,6 +261,7 @@ namespace BreakoutGame
 
 		private void removeBlocks()
 		{
+			// Uklanja sve cigle
 			foreach(PictureBox x in blockList)
 			{
 				this.splitContainer1.Panel2.Controls.Remove(x);
@@ -280,6 +281,7 @@ namespace BreakoutGame
 
 		private void gameOver()
 		{
+			//sviraj zvuk i zaustavi timere
 			playSound("broken");
 			isGameOver = true;
 			gameTimer.Stop();
@@ -290,14 +292,18 @@ namespace BreakoutGame
 
 			//Ako je score među top 3, upiši ga u highScore.txt
 			var stream = new StreamReader(@".\..\..\Resources\highScore.txt");
+			
 			//sluzi da znamo je li postignut novi highscore
 			bool flag = false;
+
 			for (int i = 0; i < 3; i++)
 			{
+				// citamo linije iz highScores.txt te usporedujemo sa score
 				string red = stream.ReadLine();
 				string[] names = red.Split(',');
 				if (Int32.Parse(names[0]) < score)
                 {
+					// score treba upisati u listu highScore
 					string ime = Prompt.ShowDialog("Osvojili ste "+ (i+1).ToString() + ". najbolji rezultat. Molimo upišite svoje ime.", "Čestitamo!");
 					while (ime == "")
 						ime = Prompt.ShowDialog("Molimo upišite ime.","Ne zafrkavajte se");
@@ -310,12 +316,13 @@ namespace BreakoutGame
 			}
 			if (!flag)
             {
+				//highScore nije psotignut
 				Form highscores = new ScoresForm(score);
 				highscores.ShowDialog();
 			}
 		}
 
-		private void mainGameTimerEvent(object sender, EventArgs e)
+		private void mainGameTimerEvent(object sender, EventArgs e) //glavni timer, ima interval 20 ms
 		{
 			scoreText.Text = "Score: " + score;
 
@@ -463,6 +470,7 @@ namespace BreakoutGame
 				{
 					x.Top += 33;
 					lowest += 33;
+					//ako su cigle dosle prenisko igra je gotova
 					if (x.Top + 33 > player.Top)
 						gameOver();
 				}
@@ -479,11 +487,12 @@ namespace BreakoutGame
 					
 				}
 				draw_rows(1);
+				//resetiraj brojac
 				time_to_shift = 0;
 			}
 		}
 
-
+		// provjeravamo je li se loptica sudarila s nekom ciglom
 		private void provjeriUdarenjeOdCiglu()
 		{
 			for (int tmpCounter = 0; tmpCounter < ballList.Count; ++tmpCounter)
@@ -506,7 +515,6 @@ namespace BreakoutGame
 								{
 									if (z.Tag is Block || (z.Tag is Effect && !((Effect)z.Tag).Mobile))
 									{
-										// z == x
 										if (z.Left == x.Left && z.Top == x.Top)
 											continue;
 										else
@@ -623,7 +631,7 @@ namespace BreakoutGame
 
 		private void provjeriUdaranjeOdRub()
         {
-
+			// Za svaku lopticu provjeri je li se sudarila sa zidom
 			for(int tmpCounter = 0; tmpCounter < ballList.Count; ++tmpCounter)
             {
 				PictureBox mBall = ballList[tmpCounter];
@@ -649,6 +657,7 @@ namespace BreakoutGame
 			{
 				PictureBox mBall = ballList[tmpCounter];
 
+				//kut pod kojim se loptica odbija je zadan time gdje je udrila o plocu
 				if (mBall.Bounds.IntersectsWith(player.Bounds))
 				{
 					//isti zvuk kao i kad udara u zid
@@ -668,16 +677,6 @@ namespace BreakoutGame
 					//kut odbijanja lopte
 					double kut = Math.PI / 2 + omjer * (-Math.PI / 2);
 
-					//kut_2 je "klasični kut odbijanja lopte od neke podloge
-					/*
-					double kut_2 = 0;
-					if (ballX < 0 && ballY > 0)
-						kut_2 = Math.PI - Math.Atan(ballY / -ballX);
-					else if (ballX > 0 && ballY > 0)
-						kut_2 = Math.Atan(ballY / ballX);
-					else if (ballX == 0)
-						kut_2 = Math.PI / 2;
-					*/
 
 					//nedaj kut manji od PI/7 ili veći od 6PI/7
 					kut = Math.Abs(kut) < Math.PI / 7 ? Math.PI / 7 : kut;
@@ -690,7 +689,7 @@ namespace BreakoutGame
             }
 		}
 
-
+		// gleda micemo li plocu 
 		private void keyisdown(object sender, KeyEventArgs e)
 		{
 			if(e.KeyCode == Keys.Left)
@@ -703,6 +702,7 @@ namespace BreakoutGame
 			}
 		}
 
+		// Prestanak kretanja igraca
 		private void keyisup(object sender, KeyEventArgs e)
 		{
 			if (e.KeyCode == Keys.Left)
@@ -713,6 +713,7 @@ namespace BreakoutGame
 			{
 				goRight = false;
 			}
+			// Kad smo zavrsili, klikom na enter pokrecemo novu igru
 			if (e.KeyCode == Keys.Enter && isGameOver == true)
 			{
 				removeBlocks();
@@ -727,13 +728,12 @@ namespace BreakoutGame
 			int minutes = counter / 60;
 			label2.Text = minutes.ToString("D2") + ":" + seconds.ToString("D2");
 
-			//fast_slow_time++;
 			time_to_shift++;
 
 			mSeconds++;
 			//Dodajemo ubrzanje loptice nakon sto porde odredeni period vremena.
-			//Ubrzanje se dogada svakih 45 sekundi
-			if(mSeconds > 45)
+			//Ubrzanje se dogada svakih 30 sekundi
+			if(mSeconds > 30)
             {
 				mSeconds = 0;
 				standard_ball_speed += 1;
@@ -781,7 +781,7 @@ namespace BreakoutGame
 					else
 						score += 10;
 
-					//Mozda i maknuti iz liste cigli, ne samo iz kontrola?
+					//Ukloni iz kontrole
 					this.splitContainer1.Panel2.Controls.Remove(x);
 					//Brisanje iz liste cigli i azuiranje lowest
 					lowest = 0;
@@ -857,6 +857,7 @@ namespace BreakoutGame
 					{
 						playSound("explosion");
 
+						//Ukloni ciglu iz kontrole
 						this.splitContainer1.Panel2.Controls.Remove(x);
 
 						//brisanje iz liste efekata
@@ -876,7 +877,6 @@ namespace BreakoutGame
 					else if (effectTag.Description == "newBall")
 					{
 						//Efekt stvaranja novih loptica.
-						//newballsSound.Play();
 						this.splitContainer1.Panel2.Controls.Remove(x);
 						lowest = 0;
 						foreach (PictureBox p in effectList.ToList())
@@ -884,6 +884,7 @@ namespace BreakoutGame
 								effectList.Remove(p);
 							else if (p.Top > lowest)
                             {
+								//azuriraj lowest
 								Effect ef = (Effect)p.Tag;
 								if (!ef.Mobile)
 									lowest = p.Top;
@@ -895,6 +896,7 @@ namespace BreakoutGame
 			}
 		}
 
+		//Stvara nove loptice na mjestu cigle x
 		private void createNewBalls(Control x)
         {
 			for(int i = 0; i < 2; ++i)
