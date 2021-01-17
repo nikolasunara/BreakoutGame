@@ -36,21 +36,17 @@ namespace BreakoutGame
 		List<double> ballYList = new List<double>();
 		List<PictureBox> ballList = new List<PictureBox>();
 
-		//PictureBox[] blockArray;
 		List<PictureBox> blockList = new List<PictureBox>();
 
-		//Lista posebnih efekata. Ideja je naslijediti PictureBox u klasama 
-		//Block i Effect. Za sad samo postavljamo te klase kao Tag. Ako se pokaze kao
-		//nepotrebno, kasnije cu maknuti/doraditi.
-		//List<Effect> effectsList = new List<Effect>();
+		//Lista posebnih efekata. Ukljucuje staticke(destroy, newBall) i padajuce efekte(+50, +100, fast, slow).
 		List<PictureBox> effectList = new List<PictureBox>();
 
 		Random rnd = new Random();
 
 
-		//zvukovi
+		//Zvukovi:
 		//SoundPlayer moze pustati samo jedan zvuk istovremeno i to radi
-		// u zasebnoj dretvi tako da se javlja bug kad se razbije vise cigli odjednom
+		//u zasebnoj dretvi tako da se javlja bug kad se razbije vise cigli odjednom.
 		System.Media.SoundPlayer explosionSound = new System.Media.SoundPlayer(Properties.Resources.sound_explosion);
 		System.Media.SoundPlayer brickSound = new System.Media.SoundPlayer(Properties.Resources.sound_brick_collision2);
 		System.Media.SoundPlayer gameoverSound = new System.Media.SoundPlayer(Properties.Resources.sound_gameover);
@@ -144,9 +140,10 @@ namespace BreakoutGame
 			ballFirst.Height = 26;
 			ballFirst.Width = 26;
 			ballFirst.BackColor = SystemColors.ControlDarkDark;
-			//Ako zelimo smjestiti lopticu na sredinu ploce 
+			//Ako zelimo smjestiti lopticu u sredinu prozora.
 			//ballFirst.Left = (int)(splitContainer1.Panel2.Width) / 2  - ballFirst.Width / 2;
 			//ballFirst.Top = (int)(splitContainer1.Panel2.Height) / 2  - ballFirst.Height / 2;
+			//Smjestamo lopticu na sredinu igrace ploce.
 			ballFirst.Left = player.Left + player.Width / 2 - ballFirst.Width / 2;
 			ballFirst.Top = player.Top - ballFirst.Height;
 			ballFirst.BackgroundImage = Properties.Resources.circle_cropped;
@@ -196,40 +193,40 @@ namespace BreakoutGame
 					 * Destroy cigla - unisti svoje susjede
 					 * NewBall cigla - stvara neki broj novih loptica.
 					 * 
-					 * Uzimamo random broj izmedu 0 i 1. Ako je u intervalu [0, 0.30] onda stvaramo 
-					 * zutu ciglu, ako je u <0.30, 0.6] onda crvenu, ako je u <0.6, 0.75] stvaramo 
-					 * tamnozelenu, a inace (<0.75, 0.85]) crvenu. Za <0.85, 0.93] Destroy cigla, a
-					 * <0.93, 1] NewBall cigla.
+					 * Uzimamo random broj izmedu 0 i 1. Ako je u intervalu [0, 0.20] onda stvaramo 
+					 * zutu ciglu, ako je u <0.20, 0.40] onda crvenu, ako je u <0.40, 0.60] stvaramo 
+					 * tamnozelenu, a inace (<0.60, 0.80]) purpurnu. Za <0.80, 0.90] Destroy cigla, a
+					 * <0.90, 1] NewBall cigla.
 					 * Korigirat ove brojeve u testnoj fazi.
 					 * 
-					 * Ovi brojevi trenutno promijenjeni radi testiranja.
+					 * Ovi brojevi mozemo promijenjeni radi testiranja.
 					*/
 
 					double odluka_boje = rnd.NextDouble();
 					bool is_effect = false;
-					if(odluka_boje <= 0.10)
+					if(odluka_boje <= 0.20)
                     {
 						block.BackgroundImage = Properties.Resources.yellowBrick;
 						block.Tag = new Block { blockColor = "yellow" };
 					}
-					else if (odluka_boje <= 0.2) //0.6
+					else if (odluka_boje <= 0.40) //0.40
                     {
 						block.BackgroundImage = Properties.Resources.redBrick2;
 						block.Tag = new Block { blockColor = "red" };
 					}
-					else if(odluka_boje <= 0.5) //0.75
+					else if(odluka_boje <= 0.60) //0.60
                     {
 						block.BackgroundImage = Properties.Resources.darkGreenBrick;
 						block.Tag = new Block { blockColor = "darkGreen" };
 
 					}
-					else if(odluka_boje <= 0.7) // 0.85
+					else if(odluka_boje <= 0.80) // 0.80
                     {
 						block.BackgroundImage = Properties.Resources.purpleBrick;
 						block.Tag = new Block { blockColor = "purple" };
 
 					}
-					else if (odluka_boje <= 0.85) //0.95
+					else if (odluka_boje <= 0.90) //0.90
                     {
 						block.BackgroundImage = Properties.Resources.destroy;
 						block.Tag = new Effect { Mobile = false, Description = "destroy" };
@@ -328,13 +325,6 @@ namespace BreakoutGame
 				player.Left -= playerSpeed;
 				if (ball_speed == 0.0)
                 {
-					//Ovakav kod zna dati bug ako se ubaci naknadno loptica u ballList
-					/*
-					foreach(PictureBox mBall in ballList)
-                    {
-						mBall.Left -= playerSpeed;
-                    }
-					*/
 					for (int i = 0; i < ballList.Count; ++i)
 						ballList[i].Left -= playerSpeed;
 				}
@@ -368,7 +358,7 @@ namespace BreakoutGame
 			{
 				Effect effectTag = (Effect)ef.Tag;
 				//Imamo dvije vrste efekata. Staticni su oni koji stoje na pozicijama kao cigle (destroy i newBall).
-				//Padajuci efekti su bonusi na bodove, te usporavanje i ubrzavanje loptice. Potrebno ih je realizirati.
+				//Padajuci efekti su bonusi na bodove, te usporavanje i ubrzavanje loptice.
 				if (!effectTag.Mobile) continue;
 				
 				ef.Top += 10;
@@ -448,14 +438,12 @@ namespace BreakoutGame
 				gameOver();
             }
 
-			//ako je proslo bar 5 sek od zadnjeg dodavanja probaj dodat novi red na vrh
-			//poslije cemo staviti vece
+			//Ako je proslo bar 20 sekundi od zadnjeg dodavanja probaj dodat novi red na vrh.
 			if (time_to_shift > 20)
 			{
 				//prvo provjeri moze li se pomaknuti 
 				foreach (var x in blockList)
 				{
-					//Rectangle rect = new Rectangle(x.Left, x.Top + , x.Width, 32);
 					for(int i = 0; i < ballList.Count; ++i)
 						if (ballList[i].Bounds.IntersectsWith(x.Bounds))
 							return;
@@ -464,7 +452,6 @@ namespace BreakoutGame
 				foreach (var x in effectList)
 				{
 					Effect effectTag = (Effect)x.Tag;
-					//Rectangle rect = new Rectangle(x.Left, x.Top + , x.Width, 32);
 					for(int i = 0; i < ballList.Count; ++i)
 						if ( !effectTag.Mobile &&  ballList[i].Bounds.IntersectsWith(x.Bounds))
 							return;
@@ -497,8 +484,8 @@ namespace BreakoutGame
 		}
 
 
-		//tu bih htio odrediti lpotica udara u ciglu, da dodam zvuk,
-		//no ne znam razlikovati cigle od ostalih statickih efekata
+		//Tu bih htio odrediti lopotica udara u ciglu, da dodam zvuk,
+		//no ne znam razlikovati cigle od ostalih statickih efekata.
 		private void provjeriUdarenjeOdCiglu()
 		{
 			for (int tmpCounter = 0; tmpCounter < ballList.Count; ++tmpCounter)
@@ -861,15 +848,13 @@ namespace BreakoutGame
 			}
 			else if (x.Tag is Effect)
             {
-				//Ovdje dolazi imeplementacija efekata i njihovo unistavanje
+				//Ovdje dolazi imeplementacija efekata i njihovo unistavanje.
 				//Padajuce efekte dodir s lopticom ne smeta, samo prolazi kroz nju. Oni se skupljaju
 				//pomocu igrace ploce.
-				//Staticke efekte skupljamo kad ih loptica pogodi. Tu za sad ide samo implementacija da oni
-				//nestanu kad ih se pogodi, no potrebna je jos realizacija.
+				//Staticke efekte skupljamo kad ih loptica pogodi. 
 				Effect effectTag = (Effect)x.Tag;
 				if (!effectTag.Mobile)
 				{
-					//Dodati jos brisanje iz liste efekata, kao sto treba i za cigle.
 					if (effectTag.Description == "destroy")
 					{
 						playSound("explosion");
@@ -892,7 +877,7 @@ namespace BreakoutGame
 					}
 					else if (effectTag.Description == "newBall")
 					{
-						//dodati stvaranje novih loptice
+						//Efekt stvaranja novih loptica.
 						//newballsSound.Play();
 						this.splitContainer1.Panel2.Controls.Remove(x);
 						lowest = 0;
@@ -927,12 +912,7 @@ namespace BreakoutGame
 				ballList.Add(newBall);
 				this.splitContainer1.Panel2.Controls.Add(newBall);
 
-				//Kod stvaranja novih loptica ranumao random kuteve pod kojim krecu.
-				//Ovo bi se moglo jos doradit da tocno biramo kojim se kutom odbijaju, tj. nastaju.
-				//double kut = 0.3 + rnd.NextDouble() * (2.8 - 0.3);
-				//double kut = -0.5 * Math.PI + Math.Pow(-1, i) * i * 0.1 * Math.PI;
-				//ballXList.Add( Math.Cos(kut) * ball_speed);
-				//ballYList.Add( -Math.Sin(kut) * ball_speed);
+				//Kod stvaranja novih loptica racunamo ballX i ballY vrijednosti pod kojim krecu.
 				ballXList.Add(Math.Cos(0.5 * Math.PI + 0.05 * i * Math.PI) * ball_speed);
 				ballYList.Add(-Math.Sin(0.5 * Math.PI + 0.05 * i * Math.PI) * ball_speed);
 
@@ -957,7 +937,7 @@ namespace BreakoutGame
 			}
 		}
 
-        // Funkcija namjesta ballX i ballY za sve lopte, koristi se kad se promjeni ball_speed
+        // Funkcija namjesta ballX i ballY za sve lopte, koristi se kad se promjeni ball_speed,
         void adjustBallSpeed()
         {
 			for (int i = 0; i < ballXList.Count(); i++)
