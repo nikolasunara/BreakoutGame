@@ -438,8 +438,8 @@ namespace BreakoutGame
 				gameOver();
             }
 
-			//Ako je proslo bar 20 sekundi od zadnjeg dodavanja probaj dodat novi red na vrh.
-			if (time_to_shift > 20)
+			//Ako je proslo bar 10 sekundi od zadnjeg dodavanja probaj dodat novi red na vrh.
+			if (time_to_shift > 10)
 			{
 				//prvo provjeri moze li se pomaknuti 
 				foreach (var x in blockList)
