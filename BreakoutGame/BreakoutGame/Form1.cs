@@ -484,8 +484,6 @@ namespace BreakoutGame
 		}
 
 
-		//Tu bih htio odrediti lopotica udara u ciglu, da dodam zvuk,
-		//no ne znam razlikovati cigle od ostalih statickih efekata.
 		private void provjeriUdarenjeOdCiglu()
 		{
 			for (int tmpCounter = 0; tmpCounter < ballList.Count; ++tmpCounter)
@@ -969,7 +967,7 @@ namespace BreakoutGame
 				if ((e.X - splitContainer1.Panel1.Width) < sredina_lopte_X)
 					kut = Math.PI - kut;
 
-				ball_speed = 11;
+				ball_speed = 13;
 				standard_ball_speed = ball_speed;
 				textBox1.Text = "";
 
